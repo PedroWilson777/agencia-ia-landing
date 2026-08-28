@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>systemaIA — Link</title>
+  <meta name="description" content="Sistemas, automação e atendimento com IA para o seu negócio. Fale no WhatsApp ou veja o site completo." />
+  <meta property="og:title" content="systemaIA" />
+  <meta property="og:description" content="Sistemas, automação e atendimento com IA para o seu negócio." />
+  <meta property="og:type" content="website" />
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg:#fafafa;
+      --surface:#ffffff;
+      --line:#e7e7ea;
+      --line-strong:#d8d8dd;
+      --ink:#131316;
+      --ink2:#57575f;
+      --ink3:#9c9ca4;
+      --black:#0c0c0e;
+      --shadow-sm:0 1px 3px rgba(18,18,22,.06);
+      --shadow-md:0 14px 34px rgba(18,18,22,.08);
+      --shadow-lg:0 22px 50px rgba(18,18,22,.14);
+      --radius:18px;
+      --ease:cubic-bezier(.16,.84,.24,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:'Inter',sans-serif;color:var(--ink);line-height:1.5;
+      min-height:100vh;
+      background:
+        radial-gradient(ellipse 900px 700px at 50% -10%, rgba(18,18,22,.10), transparent 60%),
+        radial-gradient(ellipse 800px 800px at 50% 110%, rgba(18,18,22,.08), transparent 58%),
+        linear-gradient(180deg, #f1f1f3 0%, #fbfbfc 22%, #f6f6f8 55%, #eeeef0 100%),
+        linear-gradient(rgba(18,18,22,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(18,18,22,.045) 1px, transparent 1px),
+        var(--bg);
+      background-size:auto,auto,auto,40px 40px,40px 40px;
+      background-repeat:no-repeat,no-repeat,no-repeat,repeat,repeat;
+      display:flex;justify-content:center;
+      padding:56px 20px 40px;
+    }
+    a{color:inherit;text-decoration:none;}
+    .wrap{width:100%;max-width:420px;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    .head{text-align:center;margin-bottom:30px;animation:fadeUp .7s var(--ease) both;}
+    .avatar{
+      width:72px;height:72px;border-radius:22px;background:var(--black);color:#fff;
+      display:flex;align-items:center;justify-content:center;margin:0 auto 18px;
+      font-weight:800;font-size:1.3rem;letter-spacing:-.02em;box-shadow:var(--shadow-md);
+    }
+    .name{font-size:1.3rem;font-weight:800;letter-spacing:-.02em;margin-bottom:8px;}
+    .name span{color:var(--ink3);}
+    .tagline{font-size:.95rem;color:var(--ink2);max-width:320px;margin:0 auto 14px;}
+    .pill{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line-strong);border-radius:30px;padding:7px 16px;font-size:.78rem;font-weight:600;color:var(--ink2);box-shadow:var(--shadow-sm);}
+    .pill .dot{width:6px;height:6px;border-radius:50%;background:#3ed67a;animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+    .links{display:flex;flex-direction:column;gap:12px;}
+    .link{
+      animation:fadeUp .7s var(--ease) both;
+      display:flex;align-items:center;gap:14px;
+      background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius);
+      padding:17px 20px;box-shadow:var(--shadow-sm);
+      transition:transform .25s var(--ease),box-shadow .25s var(--ease),border-color .25s;
+    }
+    .link:active{transform:scale(.98);}
+    @media (hover:hover){
+      .link:hover{box-shadow:var(--shadow-lg);border-color:var(--ink3);transform:translateY(-2px);}
+    }
+    .link-icon{
+      width:40px;height:40px;border-radius:12px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:1.15rem;
+      background:var(--bg);border:1px solid var(--line);
+    }
+    .link-text{flex:1;min-width:0;}
+    .link-title{font-size:.95rem;font-weight:700;letter-spacing:-.01em;}
+    .link-sub{font-size:.78rem;color:var(--ink3);margin-top:1px;}
+    .link-arrow{color:var(--ink3);font-size:1rem;transition:transform .25s var(--ease);flex-shrink:0;}
+    .link:hover .link-arrow{transform:translateX(3px);}
+
+    .link.primary{background:var(--black);border-color:var(--black);}
+    .link.primary .link-icon{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.14);}
+    .link.primary .link-title{color:#fff;}
+    .link.primary .link-sub{color:rgba(255,255,255,.55);}
+    .link.primary .link-arrow{color:rgba(255,255,255,.6);}
+
+    .foot{text-align:center;margin-top:34px;font-size:.78rem;color:var(--ink3);animation:fadeUp .7s var(--ease) .5s both;}
+    .foot a{border-bottom:1px solid var(--line-strong);padding-bottom:1px;}
+    .foot a:hover{color:var(--ink2);border-color:var(--ink3);}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <div class="avatar">IA</div>
+      <div class="name">systema<span>IA</span></div>
+      <p class="tagline">Sistemas, automação e atendimento com IA para o seu negócio.</p>
+      <span class="pill"><span class="dot"></span>Respondemos rapidinho no WhatsApp</span>
+    </div>
+
+    <div class="links">
+      <a class="link primary" style="animation-delay:.05s" target="_blank" rel="noopener"
+         href="https://wa.me/557388326856?text=Ol%C3%A1!%20Vim%20do%20Instagram%20e%20quero%20saber%20mais%20sobre%20a%20systemaIA">
+        <span class="link-icon">💬</span>
+        <span class="link-text">
+          <span class="link-title">Falar no WhatsApp agora</span>
+          <span class="link-sub">Resposta rápida, sem enrolação</span>
+        </span>
+        <span class="link-arrow">→</span>
+      </a>
+
+      <a class="link" style="animation-delay:.1s" target="_blank" rel="noopener"
+         href="https://systemaia.com.br">
+        <span class="link-icon">🌐</span>
+        <span class="link-text">
+          <span class="link-title">Ver o site completo</span>
+          <span class="link-sub">systemaia.com.br</span>
+        </span>
+        <span class="link-arrow">→</span>
+      </a>
+
+      <a class="link" style="animation-delay:.15s" target="_blank" rel="noopener"
+         href="https://wa.me/557388326856?text=Ol%C3%A1!%20Quero%20solicitar%20meu%20diagn%C3%B3stico%20gratuito">
+        <span class="link-icon">📊</span>
+        <span class="link-text">
+          <span class="link-title">Diagnóstico gratuito</span>
+          <span class="link-sub">15 min, sem compromisso</span>
+        </span>
+        <span class="link-arrow">→</span>
+      </a>
+
+      <a class="link" style="animation-delay:.2s" target="_blank" rel="noopener"
+         href="https://systemaia.com.br/#como-funciona">
+        <span class="link-icon">⚙️</span>
+        <span class="link-text">
+          <span class="link-title">Como funciona</span>
+          <span class="link-sub">O processo, passo a passo</span>
+        </span>
+        <span class="link-arrow">→</span>
+      </a>
+
+      <a class="link" style="animation-delay:.25s" target="_blank" rel="noopener"
+         href="https://systemaia.com.br/#planos">
+        <span class="link-icon">💰</span>
+        <span class="link-text">
+          <span class="link-title">Planos e preços</span>
+          <span class="link-sub">Do inicial ao completo</span>
+        </span>
+        <span class="link-arrow">→</span>
+      </a>
+    </div>
+
+    <div class="foot">© 2026 systemaIA · <a href="https://systemaia.com.br">systemaia.com.br</a></div>
+  </div>
+</body>
+</html>
