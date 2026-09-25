@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agenda Online — Demonstração | systemaIA</title>
+<meta name="description" content="Demonstração de agenda online com marcação de horário, compromissos do dia e confirmação via WhatsApp." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .agenda-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;align-items:start;}
+  .cal-panel{padding:26px;}
+  .cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+  .cal-month{font-size:1.05rem;font-weight:800;}
+  .cal-nav{display:flex;gap:6px;}
+  .cal-nav button{width:32px;height:32px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+  .cal-nav button:hover{background:var(--line-strong);}
+  .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px;}
+  .cal-dow span{text-align:center;font-size:.7rem;font-weight:700;color:var(--ink3);text-transform:uppercase;}
+  .cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:.85rem;font-weight:600;position:relative;transition:all .15s;}
+  .cal-day.empty{visibility:hidden;}
+  .cal-day.available{background:var(--surface2);cursor:pointer;}
+  .cal-day.available:hover{background:var(--line-strong);}
+  .cal-day.full{color:var(--ink3);text-decoration:line-through;cursor:not-allowed;}
+  .cal-day.past{color:var(--line-strong);cursor:not-allowed;}
+  .cal-day.selected{background:var(--black);color:#fff;}
+  .cal-day.today::after{content:'';position:absolute;bottom:5px;width:4px;height:4px;border-radius:50%;background:var(--ink3);}
+  .cal-day.selected.today::after{background:#fff;}
+  .cal-legend{display:flex;gap:18px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line);font-size:.78rem;color:var(--ink2);flex-wrap:wrap;}
+  .cal-legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:9px;height:9px;border-radius:3px;display:inline-block;}
+
+  .slots-panel{padding:26px;}
+  .slots-title{font-size:.95rem;font-weight:700;margin-bottom:4px;}
+  .slots-sub{font-size:.78rem;color:var(--ink3);margin-bottom:18px;}
+  .slots-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .slot-btn{padding:11px;border-radius:10px;background:var(--surface2);font-size:.85rem;font-weight:600;transition:all .15s;}
+  .slot-btn:hover{background:var(--line-strong);}
+  .slot-btn.selected{background:var(--black);color:#fff;}
+  .slot-btn.taken{opacity:.35;text-decoration:line-through;cursor:not-allowed;}
+
+  .booking-form{margin-top:20px;padding-top:20px;border-top:1px solid var(--line);}
+  .booking-form h4{font-size:.85rem;font-weight:700;margin-bottom:10px;}
+  .booking-line{display:flex;justify-content:space-between;font-size:.85rem;padding:5px 0;color:var(--ink2);}
+  .booking-line strong{color:var(--ink);}
+  .booking-row{margin:10px 0;}
+  .booking-row label{display:block;font-size:.68rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+  .booking-row input{width:100%;border:1px solid var(--line-strong);border-radius:10px;padding:9px 12px;font-size:.85rem;}
+  .booking-confirm{width:100%;justify-content:center;margin-top:8px;padding:13px;}
+
+  .day-appts{margin-top:22px;padding-top:20px;border-top:1px solid var(--line);}
+  .day-appts h4{font-size:.85rem;font-weight:700;margin-bottom:10px;}
+  .appt-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.83rem;}
+  .appt-time{font-weight:700;width:48px;flex-shrink:0;}
+  .appt-name{flex:1;color:var(--ink2);}
+  .appt-del{color:var(--ink3);font-size:.78rem;cursor:pointer;flex-shrink:0;}
+  .appt-del:hover{color:var(--red);}
+
+  .reset-link{font-size:.78rem;color:var(--ink3);font-weight:600;}
+  .reset-link:hover{color:var(--ink);}
+
+  @media(max-width:900px){ .agenda-grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<div class="demo-topbar">
+  <div class="demo-topbar-inner">
+    <div class="demo-brand"><span class="logo">systema<span>IA</span></span><span class="sep">/</span><span class="label">Agenda Online</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="demo-tag">Demonstração</span>
+      <a href="../index.html" class="demo-back">← voltar ao site</a>
+      <a href="https://saas-flow-eight.vercel.app/signup?utm_source=site&amp;utm_medium=demo&amp;utm_campaign=produto&amp;utm_content=agenda" class="demo-cta">Testar grátis 7 dias →</a>
+    </div>
+  </div>
+</div>
+<div class="demo-banner">Isso é uma <strong>demonstração</strong> — escolha um dia e horário, preencha seu nome e confirme. Fica salvo no seu navegador. <a href="#" class="reset-link" onclick="resetDemo();return false;" style="margin-left:8px;">↺ Restaurar exemplo</a></div>
+
+<div class="demo-shell">
+  <div class="demo-page-head">
+    <h1>Marque seu horário</h1>
+    <p id="pageSub">Escolha o melhor dia e horário disponível</p>
+  </div>
+
+  <div class="agenda-grid">
+    <div class="cal-panel card">
+      <div class="cal-head">
+        <div class="cal-month" id="calMonth"></div>
+        <div class="cal-nav">
+          <button onclick="changeMonth(-1)">‹</button>
+          <button onclick="changeMonth(1)">›</button>
+        </div>
+      </div>
+      <div class="cal-dow"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+      <div class="cal-days" id="calDays"></div>
+      <div class="cal-legend">
+        <span><span class="dot" style="background:var(--surface2);border:1px solid var(--line-strong)"></span> Disponível</span>
+        <span><span class="dot" style="background:var(--black)"></span> Selecionado</span>
+        <span><span class="dot" style="background:var(--line)"></span> Lotado</span>
+      </div>
+    </div>
+
+    <div class="slots-panel card">
+      <div class="slots-title" id="slotsTitle">Selecione um dia</div>
+      <div class="slots-sub" id="slotsSub">Os horários disponíveis aparecem aqui</div>
+      <div class="slots-grid" id="slotsGrid"></div>
+      <div class="booking-form" id="bookingForm" style="display:none;"></div>
+      <div class="day-appts" id="dayAppts" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO DA DEMONSTRAÇÃO
+   Troque os valores abaixo pra personalizar essa demo pro cliente
+   antes de mandar o link pra ele (nome do negócio, WhatsApp, etc.)
+   ============================================================ */
+const CONFIG = {
+  negocio: 'Studio Bella Estética',
+  whatsapp: '5573988326856',   // WhatsApp que recebe a confirmação (número do NEGÓCIO)
+  slots: ['09:00','09:30','10:00','10:30','11:00','14:00','14:30','15:00','15:30','16:00','16:30','17:00'],
+}
+/* PRODUÇÃO — pra virar sistema real (não só demonstração), trocar:
+   - localStorage por banco de dados (Supabase/Postgres), pra ficar acessível de qualquer dispositivo
+   - a geração de horários fictícios por integração com agenda real (Google Calendar API)
+   - o link wa.me por envio automático via API do WhatsApp Business (Evolution API ou Meta oficial)
+*/
+
+const WA_NUMBER = CONFIG.whatsapp
+document.querySelectorAll('.wa-link').forEach(el => {
+  const msg = encodeURIComponent(el.dataset.msg || 'Olá!')
+  el.setAttribute('href', `https://wa.me/${WA_NUMBER}?text=${msg}`)
+  el.setAttribute('target', '_blank')
+  el.setAttribute('rel', 'noopener')
+})
+document.getElementById('pageSub').textContent = `Escolha o melhor dia e horário pra marcar com ${CONFIG.negocio}`
+
+const STORAGE_KEY = 'systemaia_agenda_demo_v1'
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+const FAKE_NAMES = ['Ana Paula','Bruno Costa','Carla Menezes','Diego Farias','Elaine Souza','Felipe Rocha','Gabriela Lima','Hugo Martins']
+
+function dayKey(y,m,d){ return `${y}-${m}-${d}` }
+function isFull(y,m,d){ return (d % 7 === 0) }
+
+function loadAppointments(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return {}
+    const data = JSON.parse(raw)
+    return (data && typeof data === 'object') ? data : {}
+  } catch(e) { return {} }
+}
+function persist(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appointments)) } catch(e) {} }
+
+let appointments = loadAppointments()
+
+function getDayAppointments(y,m,d){
+  const key = dayKey(y,m,d)
+  if (!appointments[key]) {
+    const seed = d * 13 + m
+    appointments[key] = CONFIG.slots
+      .filter((_, i) => (seed + i) % 4 === 0)
+      .map((slot, i) => ({ id: i+1, time: slot, name: FAKE_NAMES[(seed+i) % FAKE_NAMES.length] }))
+    persist()
+  }
+  return appointments[key]
+}
+
+function resetDemo(){
+  if (!confirm('Restaurar a agenda pro estado de exemplo? Isso apaga os agendamentos feitos nesta demonstração.')) return
+  appointments = {}
+  localStorage.removeItem(STORAGE_KEY)
+  selectedDate = null; selectedSlot = null
+  renderCalendar(); renderSlots()
+}
+
+const today = new Date()
+let viewYear = today.getFullYear()
+let viewMonth = today.getMonth()
+let selectedDate = null
+let selectedSlot = null
+
+function changeMonth(delta){
+  viewMonth += delta
+  if (viewMonth < 0) { viewMonth = 11; viewYear-- }
+  if (viewMonth > 11) { viewMonth = 0; viewYear++ }
+  selectedDate = null; selectedSlot = null
+  renderCalendar(); renderSlots()
+}
+
+function renderCalendar(){
+  document.getElementById('calMonth').textContent = `${MONTHS[viewMonth]} ${viewYear}`
+  const firstDow = new Date(viewYear, viewMonth, 1).getDay()
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
+  const cells = []
+  for (let i = 0; i < firstDow; i++) cells.push(`<div class="cal-day empty"></div>`)
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateObj = new Date(viewYear, viewMonth, d)
+    const isPast = dateObj < new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    const isToday = dateObj.toDateString() === today.toDateString()
+    const full = isFull(viewYear, viewMonth, d)
+    const isSelected = selectedDate && selectedDate.d === d && selectedDate.m === viewMonth && selectedDate.y === viewYear
+    let cls = 'cal-day'
+    if (isPast) cls += ' past'
+    else if (full) cls += ' full'
+    else cls += ' available'
+    if (isToday) cls += ' today'
+    if (isSelected) cls += ' selected'
+    const clickable = !isPast && !full
+    cells.push(`<div class="${cls}" ${clickable ? `onclick="selectDay(${viewYear},${viewMonth},${d})"` : ''}>${d}</div>`)
+  }
+  document.getElementById('calDays').innerHTML = cells.join('')
+}
+
+function selectDay(y,m,d){
+  selectedDate = { y, m, d }
+  selectedSlot = null
+  renderCalendar(); renderSlots()
+}
+
+function renderSlots(){
+  const grid = document.getElementById('slotsGrid')
+  const form = document.getElementById('bookingForm')
+  const dayAppts = document.getElementById('dayAppts')
+  if (!selectedDate) {
+    document.getElementById('slotsTitle').textContent = 'Selecione um dia'
+    document.getElementById('slotsSub').textContent = 'Os horários disponíveis aparecem aqui'
+    grid.innerHTML = ''
+    form.style.display = 'none'
+    dayAppts.style.display = 'none'
+    return
+  }
+  const { y, m, d } = selectedDate
+  document.getElementById('slotsTitle').textContent = `${d} de ${MONTHS[m]}`
+  document.getElementById('slotsSub').textContent = 'Escolha um horário disponível'
+  const dayList = getDayAppointments(y, m, d)
+  const takenTimes = dayList.map(a => a.time)
+  grid.innerHTML = CONFIG.slots.map(slot => {
+    const isTaken = takenTimes.includes(slot)
+    const isSelected = selectedSlot === slot
+    return `<button class="slot-btn ${isSelected?'selected':''} ${isTaken?'taken':''}" ${isTaken?'disabled':`onclick="selectSlot('${slot}')"`}>${slot}</button>`
+  }).join('')
+  renderBookingForm()
+  renderDayAppointments(dayList)
+}
+
+function selectSlot(slot){ selectedSlot = slot; renderSlots() }
+
+function renderBookingForm(){
+  const form = document.getElementById('bookingForm')
+  if (!selectedSlot) { form.style.display = 'none'; return }
+  const { y, m, d } = selectedDate
+  const dateStr = `${d} de ${MONTHS[m]} de ${y}`
+  form.style.display = 'block'
+  form.innerHTML = `
+    <h4>Confirmar agendamento</h4>
+    <div class="booking-line"><span>Data</span><strong>${dateStr}</strong></div>
+    <div class="booking-line"><span>Horário</span><strong>${selectedSlot}</strong></div>
+    <div class="booking-row"><label>Seu nome</label><input type="text" id="bookName" placeholder="Nome completo" /></div>
+    <div class="booking-row"><label>WhatsApp</label><input type="text" id="bookPhone" placeholder="(DDD) 90000-0000" /></div>
+    <button class="btn btn-primary booking-confirm" onclick="confirmBooking()">Confirmar agendamento →</button>
+  `
+}
+
+function renderDayAppointments(dayList){
+  const el = document.getElementById('dayAppts')
+  if (!dayList.length) { el.style.display = 'none'; return }
+  el.style.display = 'block'
+  const sorted = [...dayList].sort((a,b) => a.time.localeCompare(b.time))
+  el.innerHTML = `
+    <h4>Compromissos do dia</h4>
+    ${sorted.map(a => `
+      <div class="appt-row">
+        <span class="appt-time">${a.time}</span>
+        <span class="appt-name">${a.name}</span>
+        <span class="appt-del" onclick="cancelAppointment('${a.id}')" title="Cancelar">✕</span>
+      </div>
+    `).join('')}
+  `
+}
+
+function confirmBooking(){
+  const name = document.getElementById('bookName').value.trim()
+  const phone = document.getElementById('bookPhone').value.trim()
+  if (!name) { document.getElementById('bookName').focus(); return }
+  const { y, m, d } = selectedDate
+  const key = dayKey(y, m, d)
+  const dayList = getDayAppointments(y, m, d)
+  const nextId = (dayList.reduce((max,a) => Math.max(max, a.id), 0)) + 1
+  dayList.push({ id: nextId, time: selectedSlot, name, phone })
+  appointments[key] = dayList
+  persist()
+
+  const dateStr = `${d} de ${MONTHS[m]} de ${y}`
+  const msg = encodeURIComponent(`Olá! Gostaria de confirmar este agendamento (feito na agenda de demonstração):\n\nNome: ${name}\nData: ${dateStr}\nHorário: ${selectedSlot}\n\n[Essa é uma demo — quero um sistema assim pro meu negócio!]`)
+  window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank', 'noopener')
+
+  selectedSlot = null
+  renderCalendar(); renderSlots()
+}
+
+function cancelAppointment(id){
+  const { y, m, d } = selectedDate
+  const key = dayKey(y, m, d)
+  appointments[key] = (appointments[key] || []).filter(a => String(a.id) !== String(id))
+  persist()
+  renderCalendar(); renderSlots()
+}
+
+renderCalendar()
+renderSlots()
+</script>
+</body>
+</html>

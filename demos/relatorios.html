@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Relatórios — Demonstração | systemaIA</title>
+<meta name="description" content="Demonstração de relatórios com exportação de dados." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .filter-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+  .range-tabs{display:flex;gap:6px;background:var(--surface2);padding:4px;border-radius:50px;}
+  .range-tab{padding:7px 16px;border-radius:50px;font-size:.8rem;font-weight:600;color:var(--ink2);}
+  .range-tab.active{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm);}
+
+  .summary-strip{display:flex;gap:24px;padding:20px 24px;margin-bottom:16px;flex-wrap:wrap;}
+  .summary-item{}
+  .summary-item .label{font-size:.75rem;color:var(--ink3);font-weight:600;margin-bottom:4px;}
+  .summary-item .val{font-size:1.2rem;font-weight:800;}
+
+  .panel{padding:24px;margin-bottom:16px;}
+  .panel-title{font-size:.95rem;font-weight:700;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+
+  .bar-chart{display:flex;align-items:flex-end;gap:10px;height:180px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end;}
+  .bar{width:100%;background:linear-gradient(180deg,var(--ink) 0%,#3a3a40 100%);border-radius:6px 6px 2px 2px;}
+  .bar-label{font-size:.7rem;color:var(--ink3);font-weight:600;}
+
+  table{width:100%;border-collapse:collapse;}
+  th{text-align:left;font-size:.72rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;padding:0 14px 12px;}
+  td{padding:13px 14px;font-size:.85rem;border-top:1px solid var(--line);}
+
+  @media(max-width:700px){ .summary-strip{gap:16px;} }
+</style>
+</head>
+<body>
+
+<div class="demo-topbar">
+  <div class="demo-topbar-inner">
+    <div class="demo-brand"><span class="logo">systema<span>IA</span></span><span class="sep">/</span><span class="label">Relatórios</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="demo-tag">Demonstração</span>
+      <a href="../index.html" class="demo-back">← voltar ao site</a>
+      <a href="#" class="demo-cta wa-link" data-msg="Olá! Vi a demonstração de relatorios e quero entrar na lista de espera desse módulo.">Em desenvolvimento — entrar na lista →</a>
+    </div>
+  </div>
+</div>
+<div class="demo-banner">📈 Isso é uma <strong>demonstração</strong> — o botão "Exportar CSV" abaixo baixa um arquivo de verdade com esses dados.</div>
+
+<div class="demo-shell">
+  <div class="filter-row">
+    <div class="demo-page-head" style="margin-bottom:0;">
+      <h1>Relatório de vendas</h1>
+      <p>Desempenho por produto/serviço no período</p>
+    </div>
+    <div class="range-tabs" id="rangeTabs"></div>
+  </div>
+
+  <div class="summary-strip card" id="summaryStrip"></div>
+
+  <div class="panel card">
+    <div class="panel-title">Vendas por dia</div>
+    <div class="bar-chart" id="barChart"></div>
+  </div>
+
+  <div class="panel card">
+    <div class="panel-title">
+      <span>Detalhamento por item</span>
+      <button class="btn btn-primary btn-sm" onclick="exportCSV()">⬇ Exportar CSV</button>
+    </div>
+    <table>
+      <thead><tr><th>Item</th><th>Qtd. vendida</th><th>Faturamento</th><th>% do total</th></tr></thead>
+      <tbody id="reportBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const WA_NUMBER = '5573988326856'
+document.querySelectorAll('.wa-link').forEach(el => {
+  const msg = encodeURIComponent(el.dataset.msg || 'Olá!')
+  el.setAttribute('href', `https://wa.me/${WA_NUMBER}?text=${msg}`)
+  el.setAttribute('target', '_blank')
+  el.setAttribute('rel', 'noopener')
+})
+
+const RANGES = { '7d':'7 dias', '30d':'30 dias', '90d':'90 dias' }
+let activeRange = '30d'
+
+const DATA = {
+  '7d': {
+    summary: { total:'R$ 8.240', pedidos:'62', ticket:'R$ 133' },
+    bars: [ ['S1',40],['S2',62],['S3',48],['S4',70],['S5',58],['S6',85],['S7',66] ],
+    items: [
+      { name:'Pizza Margherita', qty:38, value:1710 },
+      { name:'Risoto de Cogumelos', qty:22, value:1144 },
+      { name:'Suco Natural', qty:54, value:648 },
+      { name:'Massa ao Pesto', qty:19, value:798 },
+      { name:'Tiramisu', qty:26, value:676 },
+    ]
+  },
+  '30d': {
+    summary: { total:'R$ 34.560', pedidos:'241', ticket:'R$ 143' },
+    bars: [ ['Sem 1',58],['Sem 2',72],['Sem 3',65],['Sem 4',85] ],
+    items: [
+      { name:'Pizza Margherita', qty:142, value:6390 },
+      { name:'Risoto de Cogumelos', qty:96, value:4992 },
+      { name:'Filé ao Molho Madeira', qty:58, value:3944 },
+      { name:'Suco Natural', qty:210, value:2520 },
+      { name:'Massa ao Pesto', qty:81, value:3402 },
+      { name:'Tiramisu', qty:104, value:2704 },
+    ]
+  },
+  '90d': {
+    summary: { total:'R$ 98.200', pedidos:'689', ticket:'R$ 142' },
+    bars: [ ['Mês 1',62],['Mês 2',78],['Mês 3',90] ],
+    items: [
+      { name:'Pizza Margherita', qty:412, value:18540 },
+      { name:'Risoto de Cogumelos', qty:288, value:14976 },
+      { name:'Filé ao Molho Madeira', qty:175, value:11900 },
+      { name:'Suco Natural', qty:640, value:7680 },
+      { name:'Massa ao Pesto', qty:245, value:10290 },
+      { name:'Tiramisu', qty:312, value:8112 },
+    ]
+  },
+}
+
+function fmt(n){ return 'R$ ' + n.toLocaleString('pt-BR') }
+
+function renderRangeTabs(){
+  document.getElementById('rangeTabs').innerHTML = Object.entries(RANGES).map(([k,label]) =>
+    `<button class="range-tab ${k===activeRange?'active':''}" onclick="setRange('${k}')">${label}</button>`
+  ).join('')
+}
+function setRange(r){ activeRange = r; renderAll() }
+
+function renderSummary(){
+  const s = DATA[activeRange].summary
+  document.getElementById('summaryStrip').innerHTML = `
+    <div class="summary-item"><div class="label">Faturamento total</div><div class="val">${s.total}</div></div>
+    <div class="summary-item"><div class="label">Pedidos</div><div class="val">${s.pedidos}</div></div>
+    <div class="summary-item"><div class="label">Ticket médio</div><div class="val">${s.ticket}</div></div>
+  `
+}
+
+function renderBars(){
+  const bars = DATA[activeRange].bars
+  const max = Math.max(...bars.map(b => b[1]))
+  document.getElementById('barChart').innerHTML = bars.map(([label,val]) => `
+    <div class="bar-col">
+      <div class="bar" style="height:${(val/max*100)}%" title="${label}: ${val}"></div>
+      <div class="bar-label">${label}</div>
+    </div>
+  `).join('')
+}
+
+function renderTable(){
+  const items = DATA[activeRange].items
+  const total = items.reduce((s,i)=>s+i.value,0)
+  document.getElementById('reportBody').innerHTML = items.map(i => `
+    <tr>
+      <td>${i.name}</td>
+      <td>${i.qty}</td>
+      <td>${fmt(i.value)}</td>
+      <td>${((i.value/total)*100).toFixed(1)}%</td>
+    </tr>
+  `).join('')
+}
+
+function exportCSV(){
+  const items = DATA[activeRange].items
+  const rows = [['Item','Quantidade vendida','Faturamento (R$)'], ...items.map(i => [i.name, i.qty, i.value])]
+  const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `relatorio-${activeRange}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+function renderAll(){
+  renderRangeTabs(); renderSummary(); renderBars(); renderTable()
+}
+renderAll()
+</script>
+</body>
+</html>

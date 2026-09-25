@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 460">
+  <rect width="400" height="460" fill="#FFFFFF"/>
+  <circle cx="200" cy="180" r="150" fill="none" stroke="#A8452B" stroke-width="6"/>
+  <circle cx="200" cy="180" r="136" fill="none" stroke="#D9A441" stroke-width="2"/>
+  <path d="M182,168 Q176,150 184,132" fill="none" stroke="#A8452B" stroke-width="3" stroke-linecap="round"/>
+  <path d="M200,168 Q194,148 203,128" fill="none" stroke="#A8452B" stroke-width="3" stroke-linecap="round"/>
+  <path d="M218,168 Q212,150 220,132" fill="none" stroke="#A8452B" stroke-width="3" stroke-linecap="round"/>
+  <path d="M148,196 Q133,196 138,176" fill="none" stroke="#D9A441" stroke-width="8" stroke-linecap="round"/>
+  <path d="M252,196 Q267,196 262,176" fill="none" stroke="#D9A441" stroke-width="8" stroke-linecap="round"/>
+  <rect x="153" y="188" width="94" height="14" rx="5" fill="#2B1D14"/>
+  <path d="M158,200 Q158,238 200,238 Q242,238 242,200 Z" fill="#D9A441"/>
+  <text x="200" y="392" text-anchor="middle" font-family="'Abril Fatface', Georgia, serif" font-size="32" letter-spacing="3" fill="#2B1D14">EMPÓRIO</text>
+  <text x="200" y="424" text-anchor="middle" font-family="'Source Sans Pro', Arial, sans-serif" font-size="19" letter-spacing="4" fill="#A8452B">SABOR CASEIRO</text>
+</svg>

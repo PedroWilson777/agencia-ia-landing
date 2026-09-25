@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cardápio Digital — Demonstração | systemaIA</title>
+<meta name="description" content="Demonstração de cardápio digital editável, com fotos dos pratos e pedido direto pelo WhatsApp." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .cat-tabs{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:20px;}
+  .cat-tab{flex-shrink:0;padding:9px 18px;border-radius:50px;font-size:.85rem;font-weight:600;background:var(--surface);border:1px solid var(--line-strong);color:var(--ink2);transition:all .2s;}
+  .cat-tab.active{background:var(--black);color:#fff;border-color:var(--black);}
+  .toolbar{display:flex;justify-content:flex-end;margin-bottom:16px;}
+  .menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;}
+  .menu-item{padding:0;overflow:hidden;transition:box-shadow .25s,transform .25s;position:relative;}
+  .menu-item:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px);}
+  .item-cover{height:130px;display:flex;align-items:center;justify-content:center;font-size:2.6rem;background:linear-gradient(150deg,var(--surface2),#ececef);position:relative;}
+  .item-edit{position:absolute;top:10px;left:10px;padding:6px 12px;border-radius:20px;background:rgba(255,255,255,.92);color:var(--ink2);display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:600;box-shadow:var(--shadow-sm);cursor:pointer;}
+  .item-edit:hover{background:#fff;color:var(--ink);}
+  .item-body{padding:16px 18px 18px;}
+  .item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px;}
+  .item-name{font-size:.98rem;font-weight:700;}
+  .item-price{font-size:.9rem;font-weight:800;white-space:nowrap;}
+  .item-desc{font-size:.82rem;color:var(--ink2);line-height:1.5;margin-bottom:14px;min-height:38px;}
+  .item-add{width:100%;justify-content:center;}
+  .qty-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:50px;padding:4px;}
+  .qty-btn{width:32px;height:32px;border-radius:50%;background:var(--surface);border:1px solid var(--line-strong);font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .qty-btn:hover{border-color:var(--ink);}
+  .qty-num{font-weight:700;font-size:.9rem;}
+
+  .cart-fab{position:fixed;bottom:26px;right:26px;z-index:200;background:var(--black);color:#fff;border-radius:50px;padding:14px 22px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-lg);font-weight:700;font-size:.9rem;transition:transform .2s;}
+  .cart-fab:hover{transform:translateY(-2px);}
+  .cart-fab .count{background:#fff;color:var(--black);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;}
+  .cart-fab[hidden]{display:none;}
+
+  .cart-overlay{position:fixed;inset:0;background:rgba(10,10,14,.5);backdrop-filter:blur(4px);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s;}
+  .cart-overlay.open{opacity:1;pointer-events:auto;}
+  .cart-panel{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--surface);z-index:301;box-shadow:var(--shadow-lg);transform:translateX(100%);transition:transform .35s var(--ease);display:flex;flex-direction:column;}
+  .cart-overlay.open .cart-panel{transform:translateX(0);}
+  .cart-head{padding:22px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+  .cart-head h3{font-size:1.1rem;font-weight:800;}
+  .cart-close{width:34px;height:34px;border-radius:50%;background:var(--surface2);font-size:1.1rem;display:flex;align-items:center;justify-content:center;}
+  .cart-lines{flex:1;overflow-y:auto;padding:16px 24px;}
+  .cart-line{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .cart-line-name{font-size:.88rem;font-weight:600;}
+  .cart-line-price{font-size:.78rem;color:var(--ink3);margin-top:2px;}
+  .cart-line-qty{display:flex;align-items:center;gap:8px;}
+  .cart-foot{padding:20px 24px 26px;border-top:1px solid var(--line);}
+  .cart-total-row{display:flex;justify-content:space-between;font-size:1.05rem;font-weight:800;margin-bottom:16px;}
+  .cart-submit{width:100%;justify-content:center;padding:14px;font-size:.95rem;}
+
+  .edit-overlay{position:fixed;inset:0;background:rgba(10,10,14,.5);backdrop-filter:blur(4px);z-index:400;opacity:0;pointer-events:none;transition:opacity .3s;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .edit-overlay.open{opacity:1;pointer-events:auto;}
+  .edit-modal{background:var(--surface);border-radius:26px;max-width:460px;width:100%;box-shadow:var(--shadow-lg);transform:translateY(16px) scale(.97);transition:transform .3s var(--ease);max-height:88vh;overflow-y:auto;}
+  .edit-overlay.open .edit-modal{transform:translateY(0) scale(1);}
+  .edit-modal-head{padding:22px 24px 0;display:flex;justify-content:space-between;align-items:center;}
+  .edit-modal-head h3{font-size:1.05rem;font-weight:800;}
+  .edit-modal-close{width:32px;height:32px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1rem;}
+  .edit-modal-body{padding:18px 24px 26px;}
+  .edit-row{margin-bottom:12px;}
+  .edit-row label{display:block;font-size:.68rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+  .edit-row input,.edit-row textarea{width:100%;border:1px solid var(--line-strong);border-radius:10px;padding:9px 12px;font-size:.85rem;font-family:inherit;}
+  .edit-row textarea{resize:vertical;min-height:56px;}
+  .edit-actions{display:flex;gap:8px;margin-top:16px;}
+  .danger-btn{background:var(--surface2);color:var(--red);}
+  .danger-btn:hover{background:rgba(214,69,69,.12);}
+  .img-preview-row{display:flex;align-items:center;gap:12px;}
+  .img-preview-box{width:64px;height:64px;border-radius:12px;overflow:hidden;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;}
+  .img-preview-box img{width:100%;height:100%;object-fit:cover;}
+  .img-remove-link{font-size:.76rem;color:var(--ink3);font-weight:600;}
+  .img-remove-link:hover{color:var(--red);}
+  .reset-link{font-size:.78rem;color:var(--ink3);font-weight:600;}
+  .reset-link:hover{color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="demo-topbar">
+  <div class="demo-topbar-inner">
+    <div class="demo-brand"><span class="logo">systema<span>IA</span></span><span class="sep">/</span><span class="label">Cardápio Digital</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="demo-tag">Demonstração</span>
+      <a href="../index.html" class="demo-back">← voltar ao site</a>
+      <a href="#" class="demo-cta wa-link" data-msg="Olá! Vi a demonstração de cardapio e quero entrar na lista de espera desse módulo.">Em desenvolvimento — entrar na lista →</a>
+    </div>
+  </div>
+</div>
+<div class="demo-banner">Isso é uma <strong>demonstração</strong> — clique em Editar num item pra editar nome, preço e foto. <a href="#" class="reset-link" onclick="resetDemo();return false;" style="margin-left:8px;">↺ Restaurar exemplo</a></div>
+
+<div class="demo-shell">
+  <div class="demo-page-head">
+    <h1 id="storeName">Sabor da Casa</h1>
+    <p>Cardápio completo · peça direto pelo WhatsApp, sem precisar ligar</p>
+  </div>
+
+  <div class="cat-tabs" id="catTabs"></div>
+  <div class="toolbar"><button class="btn btn-primary btn-sm" onclick="startAddItem()">+ Adicionar item</button></div>
+  <div class="menu-grid" id="menuGrid"></div>
+</div>
+
+<button class="cart-fab" id="cartFab" hidden onclick="openCart()">
+  Ver pedido <span class="count" id="cartCount">0</span>
+</button>
+
+<div class="cart-overlay" id="cartOverlay" onclick="if(event.target===this) closeCart()">
+  <div class="cart-panel">
+    <div class="cart-head">
+      <h3>Seu pedido</h3>
+      <button class="cart-close" onclick="closeCart()">&times;</button>
+    </div>
+    <div class="cart-lines" id="cartLines"></div>
+    <div class="cart-foot">
+      <div class="cart-total-row"><span>Total</span><span id="cartTotal">R$ 0,00</span></div>
+      <a href="#" class="btn btn-primary cart-submit" id="cartSubmit" target="_blank" rel="noopener">Finalizar pedido no WhatsApp →</a>
+    </div>
+  </div>
+</div>
+
+<div class="edit-overlay" id="editOverlay" onclick="if(event.target===this) closeEditItem()">
+  <div class="edit-modal" id="editModal"></div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO DA DEMONSTRAÇÃO
+   Troque os valores abaixo pra personalizar essa demo pro cliente
+   ============================================================ */
+const CONFIG = {
+  negocio: 'Sabor da Casa',
+  whatsapp: '5573988326856',   // WhatsApp que recebe os pedidos (número do NEGÓCIO)
+}
+/* PRODUÇÃO — pra virar sistema real, trocar:
+   - localStorage por banco de dados (Supabase/Postgres) — as fotos hoje ficam salvas como
+     imagem comprimida direto no navegador; em produção usar um storage de arquivos real (S3/Supabase Storage)
+   - o link wa.me por checkout integrado (pagamento online via Pix/cartão)
+*/
+
+const WA_NUMBER = CONFIG.whatsapp
+document.querySelectorAll('.wa-link').forEach(el => {
+  const msg = encodeURIComponent(el.dataset.msg || 'Olá!')
+  el.setAttribute('href', `https://wa.me/${WA_NUMBER}?text=${msg}`)
+  el.setAttribute('target', '_blank')
+  el.setAttribute('rel', 'noopener')
+})
+document.getElementById('storeName').textContent = CONFIG.negocio
+
+const MENU_KEY = 'systemaia_cardapio_menu_v1'
+const CART_KEY = 'systemaia_cardapio_carrinho_v1'
+
+function seedMenu(){
+  return [
+    { id:'bru', cat:'Entradas', name:'Bruschetta', desc:'Pão italiano, tomate fresco, manjericão e azeite.', price:22, image:null },
+    { id:'pao', cat:'Entradas', name:'Pão de Alho', desc:'Receita da casa, na chapa, porção generosa.', price:18, image:null },
+    { id:'bac', cat:'Entradas', name:'Bolinho de Bacalhau', desc:'8 unidades, tradicional, com limão.', price:28, image:null },
+    { id:'piz', cat:'Pratos principais', name:'Pizza Margherita', desc:'Molho de tomate, muçarela de búfala e manjericão.', price:45, image:null },
+    { id:'ris', cat:'Pratos principais', name:'Risoto de Cogumelos', desc:'Arbóreo, mix de cogumelos frescos, parmesão.', price:52, image:null },
+    { id:'fil', cat:'Pratos principais', name:'Filé ao Molho Madeira', desc:'Filé mignon grelhado, molho madeira, batata rústica.', price:68, image:null },
+    { id:'mas', cat:'Pratos principais', name:'Massa ao Pesto', desc:'Talharim fresco, pesto de manjericão, castanhas.', price:42, image:null },
+    { id:'suc', cat:'Bebidas', name:'Suco Natural', desc:'Laranja, limão ou maracujá — 500ml.', price:12, image:null },
+    { id:'ref', cat:'Bebidas', name:'Refrigerante', desc:'Lata 350ml, diversos sabores.', price:8, image:null },
+    { id:'agu', cat:'Bebidas', name:'Água com Gás', desc:'500ml, gelada.', price:6, image:null },
+    { id:'vin', cat:'Bebidas', name:'Vinho Taça', desc:'Tinto ou branco da casa.', price:24, image:null },
+    { id:'pet', cat:'Sobremesas', name:'Petit Gateau', desc:'Com sorvete de creme e calda quente.', price:24, image:null },
+    { id:'tir', cat:'Sobremesas', name:'Tiramisu', desc:'Receita italiana tradicional da casa.', price:26, image:null },
+    { id:'sor', cat:'Sobremesas', name:'Sorvete', desc:'2 bolas, sabores variados.', price:16, image:null },
+  ]
+}
+
+function loadMenu(){
+  try {
+    const raw = localStorage.getItem(MENU_KEY)
+    if (!raw) return null
+    const data = JSON.parse(raw)
+    if (!Array.isArray(data.menu)) return null
+    return data
+  } catch(e) { return null }
+}
+function persistMenu(){ try { localStorage.setItem(MENU_KEY, JSON.stringify({ menu: MENU, nextId })) } catch(e) {} }
+
+const savedMenu = loadMenu()
+let MENU = savedMenu ? savedMenu.menu : seedMenu()
+let nextId = savedMenu ? savedMenu.nextId : 1
+let activeCat = 'Todos'
+let activeItemId = null
+
+function loadCart(){
+  try {
+    const raw = localStorage.getItem(CART_KEY)
+    if (!raw) return {}
+    const data = JSON.parse(raw)
+    return (data && typeof data === 'object') ? data : {}
+  } catch(e) { return {} }
+}
+const cart = loadCart()
+function persistCart(){ try { localStorage.setItem(CART_KEY, JSON.stringify(cart)) } catch(e) {} }
+
+function resetDemo(){
+  if (!confirm('Restaurar o cardápio pro estado de exemplo? Isso apaga suas edições e o carrinho atual.')) return
+  MENU = seedMenu()
+  nextId = 1
+  localStorage.removeItem(MENU_KEY)
+  localStorage.removeItem(CART_KEY)
+  Object.keys(cart).forEach(k => delete cart[k])
+  closeEditItem()
+  renderTabs(); renderMenu(); renderCart()
+}
+
+function readImageFile(file, onDone){
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const img = new Image()
+    img.onload = () => {
+      const maxW = 480
+      const scale = Math.min(1, maxW / img.width)
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(img.width * scale)
+      canvas.height = Math.round(img.height * scale)
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
+      onDone(canvas.toDataURL('image/jpeg', 0.82))
+    }
+    img.src = e.target.result
+  }
+  reader.readAsDataURL(file)
+}
+function coverHtml(i){ return i.image ? `<img src="${i.image}" alt="${i.name}" style="width:100%;height:100%;object-fit:cover;" />` : '' }
+
+function fmt(n){ return 'R$ ' + Number(n||0).toFixed(2).replace('.', ',') }
+function categories(){ return ['Todos', ...new Set(MENU.map(i => i.cat))] }
+
+function renderTabs(){
+  document.getElementById('catTabs').innerHTML = categories().map(c => `<button class="cat-tab ${c===activeCat?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('')
+}
+function setCat(c){ activeCat = c; renderTabs(); renderMenu() }
+
+function renderMenu(){
+  const items = activeCat === 'Todos' ? MENU : MENU.filter(i => i.cat === activeCat)
+  document.getElementById('menuGrid').innerHTML = items.length ? items.map(i => {
+    const qty = cart[i.id] || 0
+    return `
+    <div class="menu-item card">
+      <div class="item-cover">
+        ${coverHtml(i)}
+        <span class="item-edit" onclick="startEditItem('${i.id}')">Editar</span>
+      </div>
+      <div class="item-body">
+        <div class="item-top"><div class="item-name">${i.name}</div><div class="item-price">${fmt(i.price)}</div></div>
+        <div class="item-desc">${i.desc}</div>
+        ${qty === 0
+          ? `<button class="btn btn-ghost item-add" onclick="addItem('${i.id}')">+ Adicionar</button>`
+          : `<div class="qty-row">
+               <button class="qty-btn" onclick="removeItem('${i.id}')">−</button>
+               <span class="qty-num">${qty} no carrinho</span>
+               <button class="qty-btn" onclick="addItem('${i.id}')">+</button>
+             </div>`
+        }
+      </div>
+    </div>`
+  }).join('') : `<div class="empty-state">Nenhum item nessa categoria</div>`
+}
+
+function addItem(id){ cart[id] = (cart[id] || 0) + 1; persistCart(); renderMenu(); renderCart() }
+function removeItem(id){
+  if (!cart[id]) return
+  cart[id]--
+  if (cart[id] <= 0) delete cart[id]
+  persistCart(); renderMenu(); renderCart()
+}
+
+function renderCart(){
+  const entries = Object.entries(cart)
+  const count = entries.reduce((s, [,q]) => s + q, 0)
+  document.getElementById('cartCount').textContent = count
+  document.getElementById('cartFab').hidden = count === 0
+
+  const lines = entries.map(([id, q]) => ({ item: MENU.find(m => m.id === id), q })).filter(l => l.item)
+  document.getElementById('cartLines').innerHTML = lines.length
+    ? lines.map(({item, q}) => `
+      <div class="cart-line">
+        <div>
+          <div class="cart-line-name">${item.name}</div>
+          <div class="cart-line-price">${fmt(item.price)} cada</div>
+        </div>
+        <div class="cart-line-qty">
+          <button class="qty-btn" onclick="removeItem('${item.id}')">−</button>
+          <span class="qty-num">${q}</span>
+          <button class="qty-btn" onclick="addItem('${item.id}')">+</button>
+        </div>
+      </div>`).join('')
+    : `<div class="empty-state">Seu carrinho está vazio</div>`
+
+  const total = lines.reduce((s, {item, q}) => s + item.price * q, 0)
+  document.getElementById('cartTotal').textContent = fmt(total)
+
+  const orderText = lines.map(({item, q}) => `${q}x ${item.name} — ${fmt(item.price * q)}`).join('\n')
+  const msg = encodeURIComponent(`Olá! Gostaria de fazer este pedido (feito no cardápio digital de demonstração):\n\n${orderText}\n\nTotal: ${fmt(total)}\n\n[Essa é uma demo — quero um sistema assim pro meu negócio!]`)
+  document.getElementById('cartSubmit').setAttribute('href', `https://wa.me/${WA_NUMBER}?text=${msg}`)
+}
+
+function openCart(){ document.getElementById('cartOverlay').classList.add('open'); document.body.style.overflow = 'hidden' }
+function closeCart(){ document.getElementById('cartOverlay').classList.remove('open'); document.body.style.overflow = '' }
+window.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCart(); closeEditItem() } })
+
+/* ---------- Editar / adicionar / excluir item do cardápio ---------- */
+
+let pendingImage = null
+let creatingNew = false
+let draftItem = null
+
+function getActiveItem(){
+  return creatingNew ? draftItem : MENU.find(x => x.id === activeItemId)
+}
+
+function startAddItem(){
+  draftItem = { id:'item'+(nextId++), cat: categories().find(c=>c!=='Todos') || 'Geral', name:'Novo item', desc:'', price:0, image:null }
+  creatingNew = true
+  activeItemId = draftItem.id
+  pendingImage = null
+  renderEditModal()
+  document.getElementById('editOverlay').classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+
+function startEditItem(id){
+  creatingNew = false
+  draftItem = null
+  activeItemId = id
+  pendingImage = null
+  renderEditModal()
+  document.getElementById('editOverlay').classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+function closeEditItem(){
+  document.getElementById('editOverlay').classList.remove('open')
+  document.body.style.overflow = ''
+  activeItemId = null
+  pendingImage = null
+  creatingNew = false
+  draftItem = null
+}
+
+function handleImagePick(event){
+  const file = event.target.files[0]
+  readImageFile(file, dataUrl => {
+    pendingImage = dataUrl
+    document.getElementById('editImgPreview').innerHTML = `<img src="${dataUrl}" alt="" />`
+  })
+}
+function removePendingImage(){
+  pendingImage = 'REMOVE'
+  document.getElementById('editImgPreview').innerHTML = ''
+}
+
+function renderEditModal(){
+  const i = getActiveItem()
+  const modal = document.getElementById('editModal')
+  if (!i) { modal.innerHTML = ''; return }
+  modal.innerHTML = `
+    <div class="edit-modal-head">
+      <h3>Editar item</h3>
+      <button class="edit-modal-close" onclick="closeEditItem()">&times;</button>
+    </div>
+    <div class="edit-modal-body">
+      <div class="edit-row"><label>Foto do prato</label>
+        <div class="img-preview-row">
+          <div class="img-preview-box" id="editImgPreview">${coverHtml(i)}</div>
+          <div>
+            <input type="file" id="editImageFile" accept="image/*" onchange="handleImagePick(event)" />
+            <div><a href="#" class="img-remove-link" onclick="removePendingImage();return false;">Remover foto</a></div>
+          </div>
+        </div>
+      </div>
+      <div class="edit-row"><label>Nome</label><input type="text" id="editName" value="${i.name}" /></div>
+      <div class="edit-row"><label>Categoria</label><input type="text" id="editCat" value="${i.cat}" /></div>
+      <div class="edit-row"><label>Preço (R$)</label><input type="number" id="editPrice" min="0" step="0.01" value="${i.price}" /></div>
+      <div class="edit-row"><label>Descrição</label><textarea id="editDesc">${i.desc}</textarea></div>
+      <div class="edit-actions">
+        <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center;" onclick="saveItem('${i.id}')">Salvar</button>
+        <button class="btn btn-ghost btn-sm" onclick="closeEditItem()">Cancelar</button>
+      </div>
+      ${creatingNew ? '' : `<button class="btn btn-sm danger-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="deleteItem('${i.id}')">Excluir item</button>`}
+    </div>
+  `
+}
+
+function saveItem(id){
+  const name = document.getElementById('editName').value.trim()
+  if (!name) return
+  const cat = document.getElementById('editCat').value.trim() || 'Geral'
+  const price = parseFloat(document.getElementById('editPrice').value) || 0
+  const desc = document.getElementById('editDesc').value.trim()
+
+  if (creatingNew) {
+    draftItem.name = name
+    draftItem.cat = cat
+    draftItem.price = price
+    draftItem.desc = desc
+    if (pendingImage === 'REMOVE') draftItem.image = null
+    else if (pendingImage) draftItem.image = pendingImage
+    MENU.push(draftItem)
+    creatingNew = false
+    draftItem = null
+  } else {
+    const i = MENU.find(x => x.id === id)
+    if (!i) return
+    i.name = name
+    i.cat = cat
+    i.price = price
+    i.desc = desc
+    if (pendingImage === 'REMOVE') i.image = null
+    else if (pendingImage) i.image = pendingImage
+  }
+  pendingImage = null
+  persistMenu()
+  closeEditItem()
+  renderTabs(); renderMenu()
+}
+
+function deleteItem(id){
+  if (!confirm('Excluir esse item do cardápio?')) return
+  MENU = MENU.filter(i => i.id !== id)
+  delete cart[id]
+  persistMenu(); persistCart()
+  closeEditItem()
+  renderTabs(); renderMenu(); renderCart()
+}
+
+renderTabs()
+renderMenu()
+renderCart()
+</script>
+</body>
+</html>

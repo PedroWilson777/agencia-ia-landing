@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cadastro de Clientes — Demonstração | systemaIA</title>
+<meta name="description" content="Demonstração de gestão de clientes editável, com histórico, busca e contato direto no WhatsApp." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .clients-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:20px;align-items:start;}
+  @media(max-width:900px){ .clients-grid{grid-template-columns:1fr;} }
+  .search-box{position:relative;margin-bottom:14px;}
+  .search-box input{width:100%;padding:12px 16px;border:1px solid var(--line-strong);border-radius:12px;font-size:.88rem;background:var(--surface);}
+  .search-box input:focus{outline:none;border-color:var(--ink3);}
+  .client-list{max-height:65vh;overflow-y:auto;}
+  .client-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;cursor:pointer;transition:background .15s;}
+  .client-row:hover{background:var(--surface2);}
+  .client-row.active{background:var(--surface2);}
+  .avatar{width:38px;height:38px;border-radius:50%;background:var(--black);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;flex-shrink:0;}
+  .client-row-name{font-size:.88rem;font-weight:700;}
+  .client-row-sub{font-size:.76rem;color:var(--ink3);}
+  .add-client-btn{width:100%;padding:11px;border-radius:12px;border:1.5px dashed var(--line-strong);color:var(--ink3);font-size:.8rem;font-weight:600;margin-top:6px;transition:all .2s;}
+  .add-client-btn:hover{border-color:var(--ink3);color:var(--ink2);}
+
+  .detail-card{padding:0;overflow:hidden;}
+  .detail-hero{padding:24px 24px 20px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:14px;}
+  .avatar-lg{width:52px;height:52px;border-radius:50%;background:var(--black);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.05rem;font-weight:700;flex-shrink:0;}
+  .detail-name{font-size:1.1rem;font-weight:800;}
+  .detail-sub{font-size:.8rem;color:var(--ink3);margin-top:2px;}
+  .detail-tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  .detail-head-actions{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
+  .icon-btn{width:30px;height:30px;border-radius:50%;background:var(--surface2);color:var(--ink2);display:flex;align-items:center;justify-content:center;font-size:.85rem;cursor:pointer;flex-shrink:0;}
+  .icon-btn:hover{background:var(--line-strong);color:var(--ink);}
+  .text-btn{padding:6px 12px;border-radius:20px;background:var(--surface2);color:var(--ink2);font-size:.76rem;font-weight:600;cursor:pointer;flex-shrink:0;}
+  .text-btn:hover{background:var(--line-strong);color:var(--ink);}
+  .detail-body{padding:22px 24px 26px;}
+  .info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:.85rem;}
+  .info-row span:first-child{color:var(--ink3);}
+  .info-row span:last-child{font-weight:600;}
+  .section-label{font-size:.75rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin:22px 0 12px;}
+  .history-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:.84rem;}
+  .history-item .date{color:var(--ink3);font-size:.76rem;}
+  .detail-actions{margin-top:22px;display:flex;gap:10px;}
+
+  .edit-row{margin-bottom:12px;}
+  .edit-row label{display:block;font-size:.68rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+  .edit-row input{width:100%;border:1px solid var(--line-strong);border-radius:10px;padding:9px 12px;font-size:.85rem;}
+  .edit-actions{display:flex;gap:8px;margin:16px 0 4px;}
+
+  .history-add{display:flex;gap:8px;margin-top:10px;}
+  .history-add input{flex:1;border:1px solid var(--line-strong);border-radius:10px;padding:8px 12px;font-size:.82rem;}
+
+  .danger-btn{width:100%;justify-content:center;margin-top:26px;background:var(--surface2);color:var(--red);}
+  .danger-btn:hover{background:rgba(214,69,69,.12);}
+  .reset-link{font-size:.78rem;color:var(--ink3);font-weight:600;}
+  .reset-link:hover{color:var(--ink);}
+
+  .sim-overlay{position:fixed;inset:0;background:rgba(10,10,14,.5);z-index:500;opacity:0;pointer-events:none;transition:opacity .25s;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .sim-overlay.open{opacity:1;pointer-events:auto;}
+  .sim-modal{background:var(--surface);border-radius:22px;max-width:380px;width:100%;box-shadow:var(--shadow-lg);padding:24px;}
+  .sim-badge{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;background:var(--surface2);color:var(--ink2);padding:5px 12px;border-radius:20px;margin-bottom:14px;}
+  .sim-to{font-size:.85rem;font-weight:700;margin-bottom:10px;}
+  .sim-bubble{background:#d9fdd3;border-radius:14px;border-bottom-right-radius:4px;padding:12px 16px;font-size:.85rem;line-height:1.5;white-space:pre-line;margin-bottom:14px;}
+  .sim-note{font-size:.76rem;color:var(--ink3);line-height:1.5;margin-bottom:16px;}
+</style>
+</head>
+<body>
+
+<div class="demo-topbar">
+  <div class="demo-topbar-inner">
+    <div class="demo-brand"><span class="logo">systema<span>IA</span></span><span class="sep">/</span><span class="label">Cadastro de Clientes</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="demo-tag">Demonstração</span>
+      <a href="../index.html" class="demo-back">← voltar ao site</a>
+      <a href="https://saas-flow-eight.vercel.app/signup?utm_source=site&amp;utm_medium=demo&amp;utm_campaign=produto&amp;utm_content=clientes" class="demo-cta">Testar grátis 7 dias →</a>
+    </div>
+  </div>
+</div>
+<div class="demo-banner">Isso é uma <strong>demonstração</strong> — busque, edite ou adicione um cliente. Fica salvo no seu navegador. <a href="#" class="reset-link" onclick="resetDemo();return false;" style="margin-left:8px;">↺ Restaurar exemplo</a></div>
+
+<div class="demo-shell">
+  <div class="demo-page-head">
+    <h1>Clientes</h1>
+    <p>Ficha completa, histórico e contato direto — tudo em um só lugar</p>
+  </div>
+
+  <div class="clients-grid">
+    <div class="card" style="padding:14px;">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Buscar cliente..." oninput="renderList()" />
+      </div>
+      <div class="client-list" id="clientList"></div>
+      <button class="add-client-btn" onclick="startAddClient()">+ Adicionar cliente</button>
+    </div>
+    <div class="detail-card card" id="detailCard"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO DA DEMONSTRAÇÃO
+   Troque os valores abaixo pra personalizar essa demo pro cliente
+   ============================================================ */
+const CONFIG = {
+  negocio: 'Studio Bella Estética',
+  whatsapp: '5573988326856',   // WhatsApp da SUA equipe (usado só no botão "Quero o meu" do topo)
+}
+/* PRODUÇÃO — pra virar sistema real, trocar:
+   - localStorage por banco de dados (Supabase/Postgres) compartilhado entre a equipe
+   - o botão de WhatsApp por integração com API do WhatsApp Business (Evolution API ou Meta oficial)
+*/
+
+const WA_NUMBER = CONFIG.whatsapp
+document.querySelectorAll('.wa-link').forEach(el => {
+  const msg = encodeURIComponent(el.dataset.msg || 'Olá!')
+  el.setAttribute('href', `https://wa.me/${WA_NUMBER}?text=${msg}`)
+  el.setAttribute('target', '_blank')
+  el.setAttribute('rel', 'noopener')
+})
+
+function simulateWhatsApp(toName, toPhone, message){
+  document.getElementById('simTo').textContent = 'Para: ' + toName + (toPhone ? ' · ' + toPhone : '')
+  document.getElementById('simBubble').textContent = message
+  document.getElementById('simOverlay').classList.add('open')
+}
+function closeSim(){ document.getElementById('simOverlay').classList.remove('open') }
+
+const STORAGE_KEY = 'systemaia_clientes_demo_v1'
+
+function seedClients(){
+  return [
+    { id:1, name:'Marina Souza', phone:'(11) 98221-4453', email:'marina.souza@email.com', since:'Jan 2026', tags:['VIP','Mensalista'],
+      history:[ {desc:'Assinatura mensal renovada', value:'R$ 997,00', date:'12/08'}, {desc:'Sessão de fotos', value:'R$ 350,00', date:'02/07'} ] },
+    { id:2, name:'Carlos Andrade', phone:'(11) 97765-2210', email:'carlos.andrade@email.com', since:'Mar 2026', tags:['Novo cliente'],
+      history:[ {desc:'Projeto site institucional', value:'R$ 2.400,00', date:'15/08'} ] },
+    { id:3, name:'Fernanda Lima', phone:'(21) 98833-9012', email:'fernanda.lima@email.com', since:'Nov 2025', tags:['VIP'],
+      history:[ {desc:'Assinatura mensal', value:'R$ 997,00', date:'05/08'}, {desc:'Consultoria extra', value:'R$ 200,00', date:'22/06'}, {desc:'Assinatura mensal', value:'R$ 997,00', date:'05/07'} ] },
+    { id:4, name:'Roberto Dias', phone:'(41) 99112-3344', email:'roberto.dias@email.com', since:'Jun 2026', tags:['Em negociação'],
+      history:[ {desc:'Orçamento enviado', value:'R$ 1.200,00', date:'20/08'} ] },
+    { id:5, name:'Juliana Prado', phone:'(31) 98456-7788', email:'juliana.prado@email.com', since:'Fev 2025', tags:['VIP','Mensalista'],
+      history:[ {desc:'Assinatura mensal', value:'R$ 1.997,00', date:'01/08'}, {desc:'Assinatura mensal', value:'R$ 1.997,00', date:'01/07'} ] },
+    { id:6, name:'Thiago Nunes', phone:'(51) 99887-6655', email:'thiago.nunes@email.com', since:'Mai 2026', tags:['Mensalista'],
+      history:[ {desc:'Gestão de tráfego', value:'R$ 600,00', date:'18/08'} ] },
+  ]
+}
+
+function loadState(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    const data = JSON.parse(raw)
+    if (!Array.isArray(data.clients)) return null
+    return data
+  } catch(e) { return null }
+}
+function persist(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ clients: CLIENTS, nextId })) } catch(e) {} }
+
+const saved = loadState()
+let CLIENTS = saved ? saved.clients : seedClients()
+let nextId = saved ? saved.nextId : 7
+let activeClientId = CLIENTS[0].id
+let editingClient = false
+let creatingNew = false
+let draftItem = null
+let activeIdBeforeAdd = null
+
+function getActiveClient(){ return creatingNew ? draftItem : CLIENTS.find(x => x.id === activeClientId) }
+
+function resetDemo(){
+  if (!confirm('Restaurar a lista de clientes pro estado de exemplo? Isso apaga suas edições nesta demonstração.')) return
+  CLIENTS = seedClients()
+  nextId = 7
+  localStorage.removeItem(STORAGE_KEY)
+  activeClientId = CLIENTS[0].id
+  editingClient = false
+  creatingNew = false
+  draftItem = null
+  activeIdBeforeAdd = null
+  renderList(); renderDetail()
+}
+
+function initials(name){ return name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase() }
+
+function renderList(){
+  const q = document.getElementById('searchInput').value.toLowerCase()
+  const filtered = CLIENTS.filter(c => c.name.toLowerCase().includes(q))
+  document.getElementById('clientList').innerHTML = filtered.length ? filtered.map(c => `
+    <div class="client-row ${c.id===activeClientId?'active':''}" onclick="selectClient(${c.id})">
+      <div class="avatar">${initials(c.name)}</div>
+      <div>
+        <div class="client-row-name">${c.name}</div>
+        <div class="client-row-sub">Cliente desde ${c.since}</div>
+      </div>
+    </div>
+  `).join('') : `<div class="empty-state">Nenhum cliente encontrado</div>`
+}
+
+function selectClient(id){
+  if (creatingNew) { creatingNew = false; draftItem = null; activeIdBeforeAdd = null }
+  activeClientId = id
+  editingClient = false
+  renderList(); renderDetail()
+}
+
+function startAddClient(){
+  draftItem = {
+    id: nextId++, name:'Novo cliente', phone:'', email:'', since: new Date().toLocaleDateString('pt-BR', { month:'short', year:'numeric' }),
+    tags:['Novo cliente'], history:[],
+  }
+  creatingNew = true
+  activeIdBeforeAdd = activeClientId
+  activeClientId = draftItem.id
+  editingClient = true
+  renderList(); renderDetail()
+}
+
+function startEditClient(){ editingClient = true; renderDetail() }
+function cancelEditClient(){
+  if (creatingNew) {
+    creatingNew = false
+    draftItem = null
+    activeClientId = activeIdBeforeAdd
+    activeIdBeforeAdd = null
+  }
+  editingClient = false
+  renderList(); renderDetail()
+}
+function saveEditClient(id){
+  const name = document.getElementById('editName').value.trim()
+  if (!name) return
+  const phone = document.getElementById('editPhone').value.trim()
+  const email = document.getElementById('editEmail').value.trim()
+  const tags = document.getElementById('editTags').value.split(',').map(t=>t.trim()).filter(Boolean)
+
+  if (creatingNew) {
+    draftItem.name = name
+    draftItem.phone = phone
+    draftItem.email = email
+    draftItem.tags = tags
+    CLIENTS.push(draftItem)
+    persist()
+    creatingNew = false
+    draftItem = null
+    activeIdBeforeAdd = null
+  } else {
+    const c = CLIENTS.find(x => x.id === id)
+    c.name = name
+    c.phone = phone
+    c.email = email
+    c.tags = tags
+    persist()
+  }
+  editingClient = false
+  renderList(); renderDetail()
+}
+
+function deleteClient(id){
+  if (!confirm('Excluir esse cliente? Essa ação não pode ser desfeita.')) return
+  CLIENTS = CLIENTS.filter(c => c.id !== id)
+  persist()
+  activeClientId = CLIENTS.length ? CLIENTS[0].id : null
+  renderList(); renderDetail()
+}
+
+function addHistory(id){
+  const c = CLIENTS.find(x => x.id === id)
+  const desc = document.getElementById('newHistDesc').value.trim()
+  const value = document.getElementById('newHistValue').value.trim()
+  if (!desc) return
+  c.history.unshift({ desc, value: value || '—', date: new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' }) })
+  persist()
+  renderDetail()
+}
+
+function renderDetail(){
+  const c = getActiveClient()
+  const card = document.getElementById('detailCard')
+  if (!c) { card.innerHTML = `<div class="empty-state">Nenhum cliente selecionado</div>`; return }
+
+  if (editingClient) {
+    card.innerHTML = `
+      <div class="detail-hero">
+        <div class="avatar-lg">${initials(c.name)}</div>
+        <div style="flex:1;">
+          <div class="edit-row"><label>Nome</label><input type="text" id="editName" value="${c.name}" /></div>
+        </div>
+      </div>
+      <div class="detail-body">
+        <div class="edit-row"><label>Telefone</label><input type="text" id="editPhone" value="${c.phone}" placeholder="(DDD) 90000-0000" /></div>
+        <div class="edit-row"><label>E-mail</label><input type="text" id="editEmail" value="${c.email}" /></div>
+        <div class="edit-row"><label>Tags (separadas por vírgula)</label><input type="text" id="editTags" value="${c.tags.join(', ')}" /></div>
+        <div class="edit-actions">
+          <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center;" onclick="saveEditClient(${c.id})">Salvar</button>
+          <button class="btn btn-ghost btn-sm" onclick="cancelEditClient()">Cancelar</button>
+        </div>
+      </div>
+    `
+    return
+  }
+
+  const totalGasto = c.history.reduce((s,h) => s + (parseFloat((h.value||'').replace('R$ ','').replace(/\./g,'').replace(',','.')) || 0), 0)
+  card.innerHTML = `
+    <div class="detail-hero">
+      <div class="avatar-lg">${initials(c.name)}</div>
+      <div>
+        <div class="detail-name">${c.name}</div>
+        <div class="detail-sub">Cliente desde ${c.since}</div>
+        <div class="detail-tags">${c.tags.map(t=>`<span class="badge badge-gray">${t}</span>`).join('')}</div>
+      </div>
+      <div class="detail-head-actions">
+        <span class="text-btn" onclick="startEditClient()">Editar</span>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="info-row"><span>Telefone</span><span>${c.phone || '—'}</span></div>
+      <div class="info-row"><span>E-mail</span><span>${c.email || '—'}</span></div>
+      <div class="info-row"><span>Total já gasto</span><span>R$ ${totalGasto.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span></div>
+
+      <div class="section-label">Histórico</div>
+      ${c.history.length ? c.history.map(h => `
+        <div class="history-item">
+          <span>${h.desc}</span>
+          <span style="text-align:right"><strong>${h.value}</strong><br><span class="date">${h.date}</span></span>
+        </div>
+      `).join('') : `<div class="empty-state">Nenhum registro ainda</div>`}
+      <div class="history-add">
+        <input type="text" id="newHistDesc" placeholder="Descrição (ex: Consulta, Pedido...)" />
+        <input type="text" id="newHistValue" placeholder="R$" style="max-width:90px;" />
+        <button class="btn btn-primary btn-sm" onclick="addHistory(${c.id})">+</button>
+      </div>
+
+      <div class="detail-actions">
+        <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="simulateWhatsApp('${c.name}', '${c.phone}', \`Olá ${c.name.split(' ')[0]}! Tudo bem? [Mensagem gerada pelo cadastro de clientes de demonstração]\`)">Chamar no WhatsApp</button>
+      </div>
+      <button class="btn danger-btn" onclick="deleteClient(${c.id})">Excluir cliente</button>
+    </div>
+  `
+}
+
+renderList()
+renderDetail()
+</script>
+
+<div class="sim-overlay" id="simOverlay" onclick="if(event.target===this) closeSim()">
+  <div class="sim-modal">
+    <div class="sim-badge">Simulação de envio</div>
+    <div class="sim-to" id="simTo"></div>
+    <div class="sim-bubble" id="simBubble"></div>
+    <p class="sim-note">Nenhuma mensagem real foi enviada — isso é uma demonstração. Números de exemplo não recebem contato real.</p>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="closeSim()">Entendi</button>
+  </div>
+</div>
+</body>
+</html>

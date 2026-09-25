@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Controle de Estoque — Demonstração | systemaIA</title>
+<meta name="description" content="Demonstração de controle de estoque editável, com alerta de reposição." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+  .kpi-card{padding:22px;}
+  .kpi-label{font-size:.78rem;color:var(--ink3);font-weight:600;margin-bottom:10px;}
+  .kpi-value{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;}
+  @media(max-width:700px){ .kpi-grid{grid-template-columns:1fr 1fr;} }
+
+  .alert-banner{display:flex;align-items:center;gap:12px;background:#fdf3e8;border:1px solid #f0d5ae;border-radius:14px;padding:14px 18px;margin-bottom:20px;font-size:.85rem;color:#7a5417;}
+  .alert-banner[hidden]{display:none;}
+  .alert-banner strong{color:#5c3f0f;}
+
+  .filter-tabs{display:flex;gap:6px;margin-bottom:18px;}
+  .filter-tab{padding:8px 16px;border-radius:50px;font-size:.8rem;font-weight:600;color:var(--ink2);background:var(--surface2);}
+  .filter-tab.active{background:var(--black);color:#fff;}
+
+  table{width:100%;border-collapse:collapse;}
+  th{text-align:left;font-size:.72rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;padding:0 14px 12px;}
+  td{padding:13px 14px;font-size:.85rem;border-top:1px solid var(--line);vertical-align:middle;}
+  .prod-name{font-weight:600;}
+  .prod-cat{font-size:.76rem;color:var(--ink3);}
+  .stock-qty{font-weight:800;font-size:.95rem;}
+  .stock-bar-track{width:80px;height:6px;border-radius:4px;background:var(--surface2);overflow:hidden;margin-top:5px;}
+  .stock-bar-fill{height:100%;border-radius:4px;}
+  .qty-controls{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
+  .qty-btn{width:28px;height:28px;border-radius:50%;background:var(--surface2);border:1px solid var(--line-strong);font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .qty-btn:hover{border-color:var(--ink);}
+  .icon-btn{width:28px;height:28px;border-radius:50%;background:var(--surface2);color:var(--ink2);display:flex;align-items:center;justify-content:center;font-size:.78rem;cursor:pointer;}
+  .icon-btn:hover{background:var(--line-strong);color:var(--ink);}
+  .text-btn{padding:6px 12px;border-radius:20px;background:var(--surface2);color:var(--ink2);font-size:.76rem;font-weight:600;cursor:pointer;flex-shrink:0;}
+  .text-btn:hover{background:var(--line-strong);color:var(--ink);}
+  .panel{padding:24px;}
+
+  .new-prod-form{padding:16px;margin-bottom:18px;}
+  .new-prod-grid{display:grid;grid-template-columns:2fr 1.4fr 1fr 1fr;gap:10px;align-items:end;}
+  .new-prod-grid .field label{display:block;font-size:.66rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+  .new-prod-grid input{width:100%;border:1px solid var(--line-strong);border-radius:10px;padding:8px 10px;font-size:.82rem;}
+  @media(max-width:900px){ .new-prod-grid{grid-template-columns:1fr 1fr;} }
+  .reset-link{font-size:.78rem;color:var(--ink3);font-weight:600;}
+  .reset-link:hover{color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="demo-topbar">
+  <div class="demo-topbar-inner">
+    <div class="demo-brand"><span class="logo">systema<span>IA</span></span><span class="sep">/</span><span class="label">Controle de Estoque</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="demo-tag">Demonstração</span>
+      <a href="../index.html" class="demo-back">← voltar ao site</a>
+      <a href="#" class="demo-cta wa-link" data-msg="Olá! Vi a demonstração de estoque e quero entrar na lista de espera desse módulo.">Em desenvolvimento — entrar na lista →</a>
+    </div>
+  </div>
+</div>
+<div class="demo-banner">Isso é uma <strong>demonstração</strong> — use os botões +/- pra ver o alerta mudar, ou cadastre um produto novo. <a href="#" class="reset-link" onclick="resetDemo();return false;" style="margin-left:8px;">↺ Restaurar exemplo</a></div>
+
+<div class="demo-shell">
+  <div class="demo-page-head">
+    <h1>Estoque</h1>
+    <p>Acompanhe a quantidade de cada produto e saiba quando repor</p>
+  </div>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+  <div class="alert-banner" id="alertBanner"></div>
+
+  <div class="panel card new-prod-form">
+    <div class="new-prod-grid">
+      <div class="field"><label>Produto</label><input type="text" id="newProdName" placeholder="Nome do produto" /></div>
+      <div class="field"><label>Categoria</label><input type="text" id="newProdCat" placeholder="Ex: Roupas" /></div>
+      <div class="field"><label>Quantidade</label><input type="number" id="newProdQty" min="0" placeholder="0" /></div>
+      <div class="field"><label>Estoque mínimo</label><input type="number" id="newProdMin" min="0" placeholder="0" /></div>
+    </div>
+    <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="addProduct()">+ Cadastrar produto</button>
+  </div>
+
+  <div class="panel card">
+    <div class="filter-tabs" id="filterTabs"></div>
+    <div style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Produto</th><th>Categoria</th><th>Nível</th><th style="text-align:right">Ajustar</th></tr></thead>
+      <tbody id="stockBody"></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO DA DEMONSTRAÇÃO
+   Troque os valores abaixo pra personalizar essa demo pro cliente
+   ============================================================ */
+const CONFIG = {
+  negocio: 'Loja Estilo Livre',
+  whatsapp: '5573988326856',   // WhatsApp do dono, que recebe os alertas de reposição
+}
+/* PRODUÇÃO — pra virar sistema real, trocar:
+   - localStorage por banco de dados (Supabase/Postgres)
+   - o alerta visual por notificação real via WhatsApp Business API quando o estoque bater no mínimo
+*/
+
+const WA_NUMBER = CONFIG.whatsapp
+document.querySelectorAll('.wa-link').forEach(el => {
+  const msg = encodeURIComponent(el.dataset.msg || 'Olá!')
+  el.setAttribute('href', `https://wa.me/${WA_NUMBER}?text=${msg}`)
+  el.setAttribute('target', '_blank')
+  el.setAttribute('rel', 'noopener')
+})
+
+const STORAGE_KEY = 'systemaia_estoque_demo_v1'
+
+function showOwnerAlert(text){
+  let el = document.getElementById('ownerAlert')
+  if (!el) {
+    el = document.createElement('div')
+    el.id = 'ownerAlert'
+    el.className = 'owner-alert'
+    el.innerHTML = `<div><div class="owner-alert-title">Alerta enviado ao WhatsApp do dono</div><div class="owner-alert-text"></div></div>`
+    document.body.appendChild(el)
+  }
+  el.querySelector('.owner-alert-text').textContent = text
+  el.classList.add('show')
+  clearTimeout(el._hideTimer)
+  el._hideTimer = setTimeout(() => el.classList.remove('show'), 4500)
+}
+
+function seedProducts(){
+  return [
+    { id:1, name:'Camisa Linho Off-white', cat:'Roupas', qty:24, min:10 },
+    { id:2, name:'Vestido Midi Floral', cat:'Roupas', qty:8, min:10 },
+    { id:3, name:'Jaqueta Jeans', cat:'Roupas', qty:0, min:5 },
+    { id:4, name:'Tênis Casual Branco', cat:'Calçados', qty:31, min:12 },
+    { id:5, name:'Sandália Tira Fina', cat:'Calçados', qty:6, min:10 },
+    { id:6, name:'Bota Coturno', cat:'Calçados', qty:14, min:8 },
+    { id:7, name:'Bolsa Transversal', cat:'Acessórios', qty:3, min:8 },
+    { id:8, name:'Óculos de Sol', cat:'Acessórios', qty:19, min:10 },
+    { id:9, name:'Relógio Minimalista', cat:'Acessórios', qty:0, min:5 },
+  ]
+}
+
+function loadState(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    const data = JSON.parse(raw)
+    if (!Array.isArray(data.products)) return null
+    return data
+  } catch(e) { return null }
+}
+function persist(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ products, nextId })) } catch(e) {} }
+
+const saved = loadState()
+let products = saved ? saved.products : seedProducts()
+let nextId = saved ? saved.nextId : 10
+let activeFilter = 'todos'
+let editingId = null
+const FILTERS = { todos:'Todos', baixo:'Estoque baixo', esgotado:'Esgotados' }
+
+function resetDemo(){
+  if (!confirm('Restaurar o estoque pro estado de exemplo? Isso apaga suas edições nesta demonstração.')) return
+  products = seedProducts()
+  nextId = 10
+  localStorage.removeItem(STORAGE_KEY)
+  editingId = null
+  renderKpis(); renderAlert(); renderTable()
+}
+
+function statusOf(p){
+  if (p.qty === 0) return 'esgotado'
+  if (p.qty <= p.min) return 'baixo'
+  return 'ok'
+}
+function statusBadge(status){
+  if (status === 'esgotado') return { cls:'badge-red', label:'Esgotado' }
+  if (status === 'baixo') return { cls:'badge-amber', label:'Estoque baixo' }
+  return { cls:'badge-green', label:'Ok' }
+}
+function barColor(status){
+  if (status === 'esgotado') return 'var(--red)'
+  if (status === 'baixo') return 'var(--amber)'
+  return 'var(--green)'
+}
+
+function renderKpis(){
+  const total = products.reduce((s,p)=>s+p.qty,0)
+  const baixo = products.filter(p => statusOf(p) === 'baixo').length
+  const esgotado = products.filter(p => statusOf(p) === 'esgotado').length
+  document.getElementById('kpiGrid').innerHTML = `
+    <div class="kpi-card card"><div class="kpi-label">Itens no estoque</div><div class="kpi-value">${total}</div></div>
+    <div class="kpi-card card"><div class="kpi-label">Produtos cadastrados</div><div class="kpi-value">${products.length}</div></div>
+    <div class="kpi-card card"><div class="kpi-label">Estoque baixo</div><div class="kpi-value" style="color:var(--amber)">${baixo}</div></div>
+    <div class="kpi-card card"><div class="kpi-label">Esgotados</div><div class="kpi-value" style="color:var(--red)">${esgotado}</div></div>
+  `
+}
+
+function renderAlert(){
+  const critical = products.filter(p => statusOf(p) !== 'ok')
+  const banner = document.getElementById('alertBanner')
+  if (!critical.length) { banner.hidden = true; return }
+  banner.hidden = false
+  banner.innerHTML = `<span><strong>${critical.length} ${critical.length===1?'produto precisa':'produtos precisam'} de reposição:</strong> ${critical.map(p=>p.name).join(', ')}</span>`
+}
+
+function renderFilters(){
+  document.getElementById('filterTabs').innerHTML = Object.entries(FILTERS).map(([k,label]) =>
+    `<button class="filter-tab ${k===activeFilter?'active':''}" onclick="setFilter('${k}')">${label}</button>`
+  ).join('')
+}
+function setFilter(f){ activeFilter = f; renderFilters(); renderTable() }
+
+function addProduct(){
+  const name = document.getElementById('newProdName').value.trim()
+  const qty = parseInt(document.getElementById('newProdQty').value, 10)
+  const min = parseInt(document.getElementById('newProdMin').value, 10)
+  if (!name) return
+  products.push({
+    id: nextId++, name, cat: document.getElementById('newProdCat').value.trim() || 'Geral',
+    qty: Number.isFinite(qty) ? qty : 0, min: Number.isFinite(min) ? min : 5,
+  })
+  document.getElementById('newProdName').value = ''
+  document.getElementById('newProdCat').value = ''
+  document.getElementById('newProdQty').value = ''
+  document.getElementById('newProdMin').value = ''
+  persist()
+  renderKpis(); renderAlert(); renderTable()
+}
+
+function deleteProduct(id){
+  if (!confirm('Excluir esse produto do estoque?')) return
+  products = products.filter(p => p.id !== id)
+  persist()
+  renderKpis(); renderAlert(); renderTable()
+}
+
+function startEdit(id){ editingId = id; renderTable() }
+function cancelEdit(){ editingId = null; renderTable() }
+function saveEdit(id){
+  const p = products.find(x => x.id === id)
+  const name = document.getElementById('editName_'+id).value.trim()
+  if (!name) return
+  p.name = name
+  p.cat = document.getElementById('editCat_'+id).value.trim() || 'Geral'
+  p.min = parseInt(document.getElementById('editMin_'+id).value, 10) || 0
+  editingId = null
+  persist()
+  renderKpis(); renderAlert(); renderTable()
+}
+
+function renderTable(){
+  let items = products
+  if (activeFilter === 'baixo') items = products.filter(p => statusOf(p) === 'baixo')
+  if (activeFilter === 'esgotado') items = products.filter(p => statusOf(p) === 'esgotado')
+
+  document.getElementById('stockBody').innerHTML = items.length ? items.map(p => {
+    if (editingId === p.id) {
+      return `
+      <tr>
+        <td><input type="text" id="editName_${p.id}" value="${p.name}" style="width:100%;border:1px solid var(--line-strong);border-radius:8px;padding:6px 8px;font-size:.82rem;" /></td>
+        <td><input type="text" id="editCat_${p.id}" value="${p.cat}" style="width:100%;border:1px solid var(--line-strong);border-radius:8px;padding:6px 8px;font-size:.82rem;" /></td>
+        <td colspan="2">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="font-size:.76rem;color:var(--ink3);">Mín.</span>
+            <input type="number" id="editMin_${p.id}" value="${p.min}" min="0" style="width:70px;border:1px solid var(--line-strong);border-radius:8px;padding:6px 8px;font-size:.82rem;" />
+            <button class="btn btn-primary btn-sm" onclick="saveEdit(${p.id})">Salvar</button>
+            <button class="btn btn-ghost btn-sm" onclick="cancelEdit()">Cancelar</button>
+          </div>
+        </td>
+      </tr>`
+    }
+    const status = statusOf(p)
+    const badge = statusBadge(status)
+    const pct = Math.min(100, Math.round((p.qty / (p.min * 2 || 1)) * 100))
+    return `
+    <tr>
+      <td><div class="prod-name">${p.name}</div></td>
+      <td class="prod-cat">${p.cat}</td>
+      <td>
+        <span class="badge ${badge.cls}">${badge.label}</span>
+        <div class="stock-qty" style="margin-top:6px;">${p.qty} un. <span style="font-weight:400;color:var(--ink3);font-size:.72rem;">(mín. ${p.min})</span></div>
+        <div class="stock-bar-track"><div class="stock-bar-fill" style="width:${pct}%;background:${barColor(status)}"></div></div>
+      </td>
+      <td>
+        <div class="qty-controls">
+          <span class="text-btn" onclick="startEdit(${p.id})">Editar</span>
+          <span class="text-btn" onclick="deleteProduct(${p.id})">Excluir</span>
+          <button class="qty-btn" onclick="adjustQty(${p.id},-1)">−</button>
+          <button class="qty-btn" onclick="adjustQty(${p.id},1)">+</button>
+        </div>
+      </td>
+    </tr>`
+  }).join('') : `<tr><td colspan="4"><div class="empty-state">Nenhum produto nessa categoria</div></td></tr>`
+}
+
+function adjustQty(id, delta){
+  const p = products.find(x => x.id === id)
+  const before = statusOf(p)
+  p.qty = Math.max(0, p.qty + delta)
+  const after = statusOf(p)
+  persist()
+  renderKpis(); renderAlert(); renderTable()
+  if (after !== 'ok' && after !== before) {
+    showOwnerAlert(`${p.name} ${after === 'esgotado' ? 'esgotou' : 'está com estoque baixo'} (${p.qty} un.) — repor em breve.`)
+  }
+}
+
+renderKpis()
+renderAlert()
+renderFilters()
+renderTable()
+</script>
+</body>
+</html>

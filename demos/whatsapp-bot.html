@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bot WhatsApp — Demonstração | systemaIA</title>
+<meta name="description" content="Demonstração de bot de atendimento automático no WhatsApp." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .phone-wrap{display:flex;justify-content:center;}
+  .phone{width:100%;max-width:400px;background:#e8e5df;border-radius:28px;box-shadow:var(--shadow-lg);overflow:hidden;border:1px solid var(--line);}
+  .phone-head{background:var(--black);color:#fff;padding:16px 18px;display:flex;align-items:center;gap:12px;}
+  .phone-avatar{width:38px;height:38px;border-radius:50%;background:#3a3a40;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;}
+  .phone-name{font-size:.92rem;font-weight:700;}
+  .phone-status{font-size:.72rem;color:rgba(255,255,255,.6);}
+  .phone-status .dot{width:6px;height:6px;border-radius:50%;background:#3ed67a;display:inline-block;margin-right:4px;}
+
+  .chat-area{height:480px;overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:10px;}
+  .bmsg{max-width:80%;padding:10px 14px;border-radius:14px;font-size:.85rem;line-height:1.5;white-space:pre-line;}
+  .bmsg.bot{background:#fff;align-self:flex-start;border-bottom-left-radius:4px;box-shadow:var(--shadow-sm);}
+  .bmsg.user{background:#d9fdd3;align-self:flex-end;border-bottom-right-radius:4px;}
+  .bmsg-time{font-size:.64rem;color:var(--ink3);margin-top:4px;text-align:right;}
+
+  .quick-replies{display:flex;flex-wrap:wrap;gap:8px;padding:4px 14px 14px;}
+  .qr-btn{padding:9px 15px;border-radius:20px;background:#fff;border:1.5px solid var(--black);font-size:.8rem;font-weight:600;box-shadow:var(--shadow-sm);}
+  .qr-btn:hover{background:var(--black);color:#fff;}
+
+  .chat-input-row{display:flex;gap:8px;padding:12px 14px;background:#e8e5df;border-top:1px solid rgba(0,0,0,.06);}
+  .chat-input{flex:1;border:none;border-radius:22px;padding:11px 16px;font-size:.85rem;background:#fff;}
+  .chat-input:focus{outline:none;}
+  .chat-send{width:42px;height:42px;border-radius:50%;background:var(--black);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+
+  .typing-dots{display:inline-flex;gap:3px;padding:12px 16px;}
+  .typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--ink3);animation:tdot 1.2s infinite;}
+  .typing-dots span:nth-child(2){animation-delay:.2s;}
+  .typing-dots span:nth-child(3){animation-delay:.4s;}
+  @keyframes tdot{0%,60%,100%{opacity:.3;}30%{opacity:1;}}
+
+  .side-note{max-width:400px;margin:20px auto 0;text-align:center;font-size:.8rem;color:var(--ink3);}
+</style>
+</head>
+<body>
+
+<div class="demo-topbar">
+  <div class="demo-topbar-inner">
+    <div class="demo-brand"><span class="logo">systema<span>IA</span></span><span class="sep">/</span><span class="label">Bot WhatsApp</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="demo-tag">Demonstração</span>
+      <a href="../index.html" class="demo-back">← voltar ao site</a>
+      <a href="#" class="demo-cta wa-link" data-msg="Olá! Vi a demonstração de whatsapp-bot e quero entrar na lista de espera desse módulo.">Em desenvolvimento — entrar na lista →</a>
+    </div>
+  </div>
+</div>
+<div class="demo-banner">Isso é uma <strong>demonstração</strong> — converse com o bot abaixo, ele responde de verdade (com regras simples).</div>
+
+<div class="demo-shell">
+  <div class="demo-page-head" style="text-align:center;">
+    <h1>Veja um bot de atendimento em ação</h1>
+    <p>Interaja com o chat abaixo — ele responde igual um bot real responderia</p>
+  </div>
+
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="phone-head">
+        <div class="phone-avatar" id="phoneAvatar"></div>
+        <div>
+          <div class="phone-name" id="phoneName">Sabor da Casa · Atendimento</div>
+          <div class="phone-status"><span class="dot"></span>online</div>
+        </div>
+      </div>
+      <div class="chat-area" id="chatArea"></div>
+      <div class="quick-replies" id="quickReplies"></div>
+      <div class="chat-input-row">
+        <input type="text" class="chat-input" id="chatInput" placeholder="Digite uma mensagem..." />
+        <button class="chat-send" onclick="handleSend()">➤</button>
+      </div>
+    </div>
+  </div>
+  <p class="side-note">Esse mesmo bot pode responder direto no seu WhatsApp Business, 24 horas por dia.</p>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO DA DEMONSTRAÇÃO
+   Troque os valores abaixo pra personalizar essa demo pro cliente —
+   nome do negócio, WhatsApp, horário de funcionamento e o texto
+   das respostas automáticas do bot.
+   ============================================================ */
+const CONFIG = {
+  negocio: 'Sabor da Casa',
+  whatsapp: '5573988326856',   // WhatsApp real que assume a conversa quando o bot chama um atendente
+  horario: 'terça a domingo, das 18h às 23h30. Segunda-feira ficamos fechados',
+}
+/* PRODUÇÃO — pra virar sistema real, trocar:
+   - essas respostas fixas (if/else) por um agente de IA de verdade (Claude API) treinado
+     no contexto do negócio, capaz de responder perguntas livres, não só o menu fixo
+   - a simulação de digitação por conexão real com WhatsApp Business API (Evolution API ou Meta oficial),
+     recebendo e respondendo mensagens de verdade 24 horas por dia
+*/
+
+const WA_NUMBER = CONFIG.whatsapp
+document.querySelectorAll('.wa-link').forEach(el => {
+  const msg = encodeURIComponent(el.dataset.msg || 'Olá!')
+  el.setAttribute('href', `https://wa.me/${WA_NUMBER}?text=${msg}`)
+  el.setAttribute('target', '_blank')
+  el.setAttribute('rel', 'noopener')
+})
+document.getElementById('phoneName').textContent = `${CONFIG.negocio} · Atendimento`
+document.getElementById('phoneAvatar').textContent = CONFIG.negocio.charAt(0).toUpperCase()
+
+const chatArea = document.getElementById('chatArea')
+const quickRepliesEl = document.getElementById('quickReplies')
+
+function nowTime(){
+  const d = new Date()
+  return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0')
+}
+
+function addMsg(from, text){
+  const div = document.createElement('div')
+  div.className = 'bmsg ' + from
+  div.innerHTML = text.replace(/\n/g,'<br>') + `<div class="bmsg-time">${nowTime()}</div>`
+  chatArea.appendChild(div)
+  chatArea.scrollTop = chatArea.scrollHeight
+}
+
+function showTyping(){
+  const div = document.createElement('div')
+  div.className = 'bmsg bot'
+  div.id = 'typingIndicator'
+  div.style.padding = '0'
+  div.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div>`
+  chatArea.appendChild(div)
+  chatArea.scrollTop = chatArea.scrollHeight
+}
+function hideTyping(){
+  const el = document.getElementById('typingIndicator')
+  if (el) el.remove()
+}
+
+function botReply(text, delay=900){
+  showTyping()
+  return new Promise(resolve => {
+    setTimeout(() => {
+      hideTyping()
+      addMsg('bot', text)
+      resolve()
+    }, delay)
+  })
+}
+
+function setQuickReplies(options){
+  quickRepliesEl.innerHTML = options.map(o => `<button class="qr-btn" onclick="handleOption('${o.id}')">${o.label}</button>`).join('')
+}
+
+const MENU_OPTIONS = [
+  { id:'cardapio', label:'Ver cardápio' },
+  { id:'horario', label:'Horário de funcionamento' },
+  { id:'atendente', label:'Falar com atendente' },
+]
+
+async function handleOption(id){
+  const opt = MENU_OPTIONS.find(o => o.id === id)
+  if (opt) addMsg('user', opt.label)
+  quickRepliesEl.innerHTML = ''
+
+  if (id === 'cardapio') {
+    await botReply('Claro! Alguns dos nossos mais pedidos:\n\nPizza Margherita — R$ 45,00\nRisoto de Cogumelos — R$ 52,00\nMassa ao Pesto — R$ 42,00\n\nVeja o cardápio completo e peça direto por aqui:')
+    await botReply(`<a href="cardapio.html" target="_blank" style="color:inherit;text-decoration:underline;">Ver cardápio completo</a>`, 500)
+  } else if (id === 'horario') {
+    await botReply(`Funcionamos de ${CONFIG.horario}`)
+  } else if (id === 'atendente') {
+    await botReply('Sem problemas! Te conectando com um atendente agora...')
+    await botReply(`<a href="https://wa.me/${WA_NUMBER}?text=${encodeURIComponent('Olá! Vim do bot de demonstração e quero falar com um atendente.')}" target="_blank" style="color:inherit;text-decoration:underline;">Continuar conversa no WhatsApp real</a>`, 700)
+  }
+  setQuickReplies(MENU_OPTIONS)
+}
+
+async function handleSend(){
+  const input = document.getElementById('chatInput')
+  const text = input.value.trim()
+  if (!text) return
+  addMsg('user', text)
+  input.value = ''
+  quickRepliesEl.innerHTML = ''
+
+  const lower = text.toLowerCase()
+  if (lower.includes('oi') || lower.includes('olá') || lower.includes('bom dia') || lower.includes('boa tarde')) {
+    await botReply('Olá! Em que posso ajudar hoje?')
+  } else if (lower.includes('preço') || lower.includes('valor') || lower.includes('quanto')) {
+    await botReply('Os preços variam por item — dá uma olhada no nosso cardápio completo que fica mais fácil:')
+    await botReply(`<a href="cardapio.html" target="_blank" style="color:inherit;text-decoration:underline;">Ver cardápio completo</a>`, 500)
+  } else if (lower.includes('horário') || lower.includes('abre') || lower.includes('fecha')) {
+    await botReply(`Funcionamos de ${CONFIG.horario}`)
+  } else {
+    await botReply('Não tenho certeza se entendi. Escolha uma das opções abaixo que eu te ajudo:')
+  }
+  setQuickReplies(MENU_OPTIONS)
+}
+document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') handleSend() })
+
+async function init(){
+  await botReply(`Olá! Bem-vindo(a) ao ${CONFIG.negocio}`, 500)
+  await botReply('Eu sou o assistente virtual — posso te ajudar com o cardápio, horários ou te conectar com um atendente. Escolha uma opção abaixo:', 900)
+  setQuickReplies(MENU_OPTIONS)
+}
+init()
+</script>
+</body>
+</html>

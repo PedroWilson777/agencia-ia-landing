@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Catálogo e Vitrine — Demonstração | systemaIA</title>
+<meta name="description" content="Demonstração de catálogo digital editável, com vitrine de produtos e pedido via WhatsApp." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .cat-tabs{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:20px;}
+  .cat-tab{flex-shrink:0;padding:9px 18px;border-radius:50px;font-size:.85rem;font-weight:600;background:var(--surface);border:1px solid var(--line-strong);color:var(--ink2);transition:all .2s;}
+  .cat-tab.active{background:var(--black);color:#fff;border-color:var(--black);}
+  .toolbar{display:flex;justify-content:flex-end;margin-bottom:16px;}
+  .prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+  .prod-card{padding:0;overflow:hidden;cursor:pointer;transition:box-shadow .25s,transform .25s;position:relative;}
+  .prod-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px);}
+  .prod-cover{height:150px;display:flex;align-items:center;justify-content:center;font-size:3rem;background:linear-gradient(150deg,var(--surface2),#ececef);position:relative;}
+  .prod-stock{position:absolute;top:10px;right:10px;}
+  .prod-edit{position:absolute;top:10px;left:10px;padding:5px 12px;border-radius:20px;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:var(--ink2);box-shadow:var(--shadow-sm);}
+  .prod-edit:hover{background:#fff;color:var(--ink);}
+  .prod-body{padding:14px 16px 16px;}
+  .prod-name{font-size:.9rem;font-weight:700;margin-bottom:4px;}
+  .prod-price{font-size:.95rem;font-weight:800;}
+
+  .detail-overlay{position:fixed;inset:0;background:rgba(10,10,14,.5);backdrop-filter:blur(4px);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .detail-overlay.open{opacity:1;pointer-events:auto;}
+  .detail-modal{background:var(--surface);border-radius:26px;max-width:520px;width:100%;box-shadow:var(--shadow-lg);transform:translateY(16px) scale(.97);transition:transform .3s var(--ease);overflow:hidden;max-height:88vh;overflow-y:auto;}
+  .detail-overlay.open .detail-modal{transform:translateY(0) scale(1);}
+  .detail-cover{height:180px;display:flex;align-items:center;justify-content:center;font-size:5rem;background:linear-gradient(150deg,var(--surface2),#ececef);position:relative;}
+  .detail-close{position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+  .detail-body{padding:26px 28px 28px;}
+  .detail-name{font-size:1.25rem;font-weight:800;margin-bottom:6px;}
+  .detail-price{font-size:1.15rem;font-weight:800;margin-bottom:14px;}
+  .detail-desc{font-size:.88rem;color:var(--ink2);line-height:1.65;margin-bottom:20px;}
+  .detail-order{width:100%;justify-content:center;padding:13px;}
+
+  .edit-row{margin-bottom:12px;}
+  .edit-row label{display:block;font-size:.68rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+  .edit-row input,.edit-row textarea,.edit-row select{width:100%;border:1px solid var(--line-strong);border-radius:10px;padding:9px 12px;font-size:.85rem;font-family:inherit;}
+  .edit-row textarea{resize:vertical;min-height:60px;}
+  .edit-actions{display:flex;gap:8px;margin-top:16px;}
+  .img-preview-row{display:flex;align-items:center;gap:12px;}
+  .img-preview-box{width:64px;height:64px;border-radius:12px;overflow:hidden;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;}
+  .img-preview-box img{width:100%;height:100%;object-fit:cover;}
+  .img-remove-link{font-size:.76rem;color:var(--ink3);font-weight:600;}
+  .img-remove-link:hover{color:var(--red);}
+  .danger-btn{background:var(--surface2);color:var(--red);}
+  .danger-btn:hover{background:rgba(214,69,69,.12);}
+  .reset-link{font-size:.78rem;color:var(--ink3);font-weight:600;}
+  .reset-link:hover{color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="demo-topbar">
+  <div class="demo-topbar-inner">
+    <div class="demo-brand"><span class="logo">systema<span>IA</span></span><span class="sep">/</span><span class="label">Catálogo e Vitrine</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="demo-tag">Demonstração</span>
+      <a href="../index.html" class="demo-back">← voltar ao site</a>
+      <a href="#" class="demo-cta wa-link" data-msg="Olá! Vi a demonstração de catalogo e quero entrar na lista de espera desse módulo.">Em desenvolvimento — entrar na lista →</a>
+    </div>
+  </div>
+</div>
+<div class="demo-banner">Isso é uma <strong>demonstração</strong> — clique num produto pra pedir, ou em Editar pra editar. Fica salvo no seu navegador. <a href="#" class="reset-link" onclick="resetDemo();return false;" style="margin-left:8px;">↺ Restaurar exemplo</a></div>
+
+<div class="demo-shell">
+  <div class="demo-page-head">
+    <h1 id="storeName">Loja Estilo Livre</h1>
+    <p>Vitrine completa · escolha e peça direto pelo WhatsApp</p>
+  </div>
+
+  <div class="cat-tabs" id="catTabs"></div>
+  <div class="toolbar"><button class="btn btn-primary btn-sm" onclick="startAddProduct()">+ Adicionar produto</button></div>
+  <div class="prod-grid" id="prodGrid"></div>
+</div>
+
+<div class="detail-overlay" id="detailOverlay" onclick="if(event.target===this) closeDetail()">
+  <div class="detail-modal" id="detailModal"></div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO DA DEMONSTRAÇÃO
+   Troque os valores abaixo pra personalizar essa demo pro cliente
+   ============================================================ */
+const CONFIG = {
+  negocio: 'Loja Estilo Livre',
+  whatsapp: '5573988326856',   // WhatsApp que recebe os pedidos (número do NEGÓCIO)
+}
+/* PRODUÇÃO — pra virar sistema real, trocar:
+   - localStorage por banco de dados (Supabase/Postgres) — as fotos hoje ficam salvas como
+     imagem comprimida direto no navegador; em produção usar um storage de arquivos real (S3/Supabase Storage)
+   - o link wa.me por checkout integrado (carrinho + pagamento online)
+*/
+
+function readImageFile(file, onDone){
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const img = new Image()
+    img.onload = () => {
+      const maxW = 480
+      const scale = Math.min(1, maxW / img.width)
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(img.width * scale)
+      canvas.height = Math.round(img.height * scale)
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
+      onDone(canvas.toDataURL('image/jpeg', 0.82))
+    }
+    img.src = e.target.result
+  }
+  reader.readAsDataURL(file)
+}
+function coverHtml(p){ return p.image ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" />` : '' }
+
+const WA_NUMBER = CONFIG.whatsapp
+document.querySelectorAll('.wa-link').forEach(el => {
+  const msg = encodeURIComponent(el.dataset.msg || 'Olá!')
+  el.setAttribute('href', `https://wa.me/${WA_NUMBER}?text=${msg}`)
+  el.setAttribute('target', '_blank')
+  el.setAttribute('rel', 'noopener')
+})
+document.getElementById('storeName').textContent = CONFIG.negocio
+
+const STORAGE_KEY = 'systemaia_catalogo_demo_v1'
+
+function seedProducts(){
+  return [
+    { id:'p1', cat:'Roupas', name:'Camisa Linho Off-white', price:189, image:null, stock:true, desc:'Camisa de linho puro, corte reto, ideal pro dia a dia ou ocasiões casuais. Tamanhos P ao GG.' },
+    { id:'p2', cat:'Roupas', name:'Vestido Midi Floral', price:229, image:null, stock:true, desc:'Vestido midi estampado, tecido leve e fluido, forro interno. Tamanhos P ao G.' },
+    { id:'p3', cat:'Roupas', name:'Jaqueta Jeans', price:259, image:null, stock:false, desc:'Jaqueta jeans clássica, lavagem média, botões metálicos. Tamanhos P ao GG.' },
+    { id:'p4', cat:'Calçados', name:'Tênis Casual Branco', price:349, image:null, stock:true, desc:'Tênis em couro sintético, solado emborrachado, super confortável pro uso diário.' },
+    { id:'p5', cat:'Calçados', name:'Sandália Tira Fina', price:159, image:null, stock:true, desc:'Sandália de tiras finas, salto médio 5cm, ideal pra festas e eventos.' },
+    { id:'p6', cat:'Calçados', name:'Bota Coturno', price:389, image:null, stock:true, desc:'Bota estilo coturno em couro legítimo, cadarço reforçado, solado antiderrapante.' },
+    { id:'p7', cat:'Acessórios', name:'Bolsa Transversal', price:219, image:null, stock:true, desc:'Bolsa transversal em couro sintético, compartimento interno e alça ajustável.' },
+    { id:'p8', cat:'Acessórios', name:'Óculos de Sol', price:129, image:null, stock:true, desc:'Óculos de sol com proteção UV400, armação em acetato, acompanha estojo.' },
+    { id:'p9', cat:'Acessórios', name:'Relógio Minimalista', price:299, image:null, stock:false, desc:'Relógio analógico, pulseira em couro, mostrador minimalista, resistente à água.' },
+  ]
+}
+
+function loadState(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    const data = JSON.parse(raw)
+    if (!Array.isArray(data.products)) return null
+    return data
+  } catch(e) { return null }
+}
+function persist(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ products: PRODUCTS, nextId })) } catch(e) {} }
+
+const saved = loadState()
+let PRODUCTS = saved ? saved.products : seedProducts()
+let nextId = saved ? saved.nextId : 10
+let activeCat = 'Todos'
+let activeProductId = null
+let editingProduct = false
+let creatingNew = false
+let draftItem = null
+
+function getCurrentProduct(){
+  return creatingNew ? draftItem : PRODUCTS.find(x => x.id === activeProductId)
+}
+
+function resetDemo(){
+  if (!confirm('Restaurar o catálogo pro estado de exemplo? Isso apaga suas edições nesta demonstração.')) return
+  PRODUCTS = seedProducts()
+  nextId = 10
+  localStorage.removeItem(STORAGE_KEY)
+  closeDetail()
+  renderTabs(); renderGrid()
+}
+
+function fmt(n){ return 'R$ ' + Number(n||0).toFixed(2).replace('.', ',') }
+function categories(){ return ['Todos', ...new Set(PRODUCTS.map(p => p.cat))] }
+
+function renderTabs(){
+  document.getElementById('catTabs').innerHTML = categories().map(c =>
+    `<button class="cat-tab ${c===activeCat?'active':''}" onclick="setCat('${c}')">${c}</button>`
+  ).join('')
+}
+function setCat(c){ activeCat = c; renderTabs(); renderGrid() }
+
+function renderGrid(){
+  const items = activeCat === 'Todos' ? PRODUCTS : PRODUCTS.filter(p => p.cat === activeCat)
+  document.getElementById('prodGrid').innerHTML = items.length ? items.map(p => `
+    <div class="prod-card card" onclick="openDetail('${p.id}')">
+      <div class="prod-cover">
+        ${coverHtml(p)}
+        <span class="prod-edit" onclick="event.stopPropagation();openDetail('${p.id}',true)">Editar</span>
+        <span class="badge ${p.stock?'badge-green':'badge-red'} prod-stock">${p.stock?'Em estoque':'Esgotado'}</span>
+      </div>
+      <div class="prod-body">
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-price">${fmt(p.price)}</div>
+      </div>
+    </div>
+  `).join('') : `<div class="empty-state">Nenhum produto nessa categoria</div>`
+}
+
+function startAddProduct(){
+  draftItem = { id:'p'+(nextId++), cat: categories().find(c=>c!=='Todos') || 'Geral', name:'Novo produto', price:0, image:null, stock:true, desc:'' }
+  creatingNew = true
+  openDetail(draftItem.id, true)
+}
+
+let pendingImage = null
+
+function openDetail(id, editMode){
+  activeProductId = id
+  editingProduct = !!editMode
+  pendingImage = null
+  renderDetailModal()
+  document.getElementById('detailOverlay').classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+function closeDetail(){
+  document.getElementById('detailOverlay').classList.remove('open')
+  document.body.style.overflow = ''
+  if (creatingNew) {
+    creatingNew = false
+    draftItem = null
+  }
+  activeProductId = null
+  pendingImage = null
+}
+
+function handleImagePick(event){
+  const file = event.target.files[0]
+  readImageFile(file, dataUrl => {
+    pendingImage = dataUrl
+    document.getElementById('editImgPreview').innerHTML = `<img src="${dataUrl}" alt="" />`
+  })
+}
+function removePendingImage(){
+  pendingImage = 'REMOVE'
+  document.getElementById('editImgPreview').innerHTML = ''
+}
+window.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail() })
+
+function renderDetailModal(){
+  const p = getCurrentProduct()
+  const modal = document.getElementById('detailModal')
+  if (!p) { modal.innerHTML = ''; return }
+
+  if (editingProduct) {
+    modal.innerHTML = `
+      <div class="detail-cover">
+        ${coverHtml(p)}
+        <button class="detail-close" onclick="closeDetail()">&times;</button>
+      </div>
+      <div class="detail-body">
+        <div class="edit-row"><label>Foto do produto</label>
+          <div class="img-preview-row">
+            <div class="img-preview-box" id="editImgPreview">${coverHtml(p)}</div>
+            <div>
+              <input type="file" id="editImageFile" accept="image/*" onchange="handleImagePick(event)" />
+              <div><a href="#" class="img-remove-link" onclick="removePendingImage();return false;">Remover foto</a></div>
+            </div>
+          </div>
+        </div>
+        <div class="edit-row"><label>Nome</label><input type="text" id="editName" value="${p.name}" /></div>
+        <div class="edit-row"><label>Categoria</label><input type="text" id="editCat" value="${p.cat}" /></div>
+        <div class="edit-row"><label>Preço (R$)</label><input type="number" id="editPrice" min="0" step="0.01" value="${p.price}" /></div>
+        <div class="edit-row"><label>Descrição</label><textarea id="editDesc">${p.desc}</textarea></div>
+        <div class="edit-row"><label>Situação</label>
+          <select id="editStock">
+            <option value="true" ${p.stock?'selected':''}>Em estoque</option>
+            <option value="false" ${!p.stock?'selected':''}>Esgotado</option>
+          </select>
+        </div>
+        <div class="edit-actions">
+          <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center;" onclick="saveProduct('${p.id}')">Salvar</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeDetail()">Cancelar</button>
+        </div>
+        ${creatingNew ? '' : `<button class="btn btn-sm danger-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="deleteProduct('${p.id}')">Excluir produto</button>`}
+      </div>
+    `
+    return
+  }
+
+  const msg = p.stock ? encodeURIComponent(`Olá! Vi no catálogo de demonstração e quero pedir:\n\n${p.name} — ${fmt(p.price)}\n\n[Essa é uma demo — quero um sistema assim pro meu negócio!]`) : ''
+  modal.innerHTML = `
+    <div class="detail-cover">
+      ${coverHtml(p)}
+      <span class="prod-edit" style="left:auto;right:56px;" onclick="openDetail('${p.id}',true)">Editar</span>
+      <button class="detail-close" onclick="closeDetail()">&times;</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-name">${p.name}</div>
+      <div class="detail-price">${fmt(p.price)}</div>
+      <div class="detail-desc">${p.desc || 'Sem descrição.'}</div>
+      ${p.stock
+        ? `<a href="https://wa.me/${WA_NUMBER}?text=${msg}" target="_blank" rel="noopener" class="btn btn-primary detail-order">Pedir esse no WhatsApp →</a>`
+        : `<button class="btn btn-ghost detail-order" disabled>Esgotado no momento</button>`
+      }
+    </div>
+  `
+}
+
+function saveProduct(id){
+  const p = getCurrentProduct()
+  const name = document.getElementById('editName').value.trim()
+  if (!name) return
+  p.name = name
+  p.cat = document.getElementById('editCat').value.trim() || 'Geral'
+  p.price = parseFloat(document.getElementById('editPrice').value) || 0
+  p.desc = document.getElementById('editDesc').value.trim()
+  p.stock = document.getElementById('editStock').value === 'true'
+  if (pendingImage === 'REMOVE') p.image = null
+  else if (pendingImage) p.image = pendingImage
+  pendingImage = null
+  editingProduct = false
+  if (creatingNew) {
+    PRODUCTS.push(draftItem)
+    creatingNew = false
+    draftItem = null
+  }
+  persist()
+  renderTabs(); renderGrid(); renderDetailModal()
+}
+
+function deleteProduct(id){
+  if (!confirm('Excluir esse produto do catálogo?')) return
+  PRODUCTS = PRODUCTS.filter(p => p.id !== id)
+  persist()
+  closeDetail()
+  renderTabs(); renderGrid()
+}
+
+renderTabs()
+renderGrid()
+</script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Painel Financeiro — Demonstração | systemaIA</title>
+<meta name="description" content="Demonstração de painel financeiro editável, com cobrança automática direto no WhatsApp do cliente." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+  @media(max-width:700px){ .kpi-grid{grid-template-columns:1fr 1fr;} }
+  .kpi-card{padding:22px;}
+  .kpi-label{font-size:.78rem;color:var(--ink3);font-weight:600;margin-bottom:10px;}
+  .kpi-value{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;}
+
+  .filter-tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;justify-content:space-between;}
+  .filter-tabs-left{display:flex;gap:6px;flex-wrap:wrap;}
+  .filter-tab{padding:8px 16px;border-radius:50px;font-size:.8rem;font-weight:600;color:var(--ink2);background:var(--surface2);}
+  .filter-tab.active{background:var(--black);color:#fff;}
+
+  table{width:100%;border-collapse:collapse;}
+  th{text-align:left;font-size:.72rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;padding:0 14px 12px;}
+  td{padding:14px;font-size:.85rem;border-top:1px solid var(--line);vertical-align:middle;}
+  .inv-client{font-weight:600;}
+  .inv-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
+  .panel{padding:24px;}
+
+  .new-inv-form{padding:16px;margin-bottom:18px;}
+  .new-inv-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:end;}
+  .new-inv-grid .field label{display:block;font-size:.66rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+  .new-inv-grid input{width:100%;border:1px solid var(--line-strong);border-radius:10px;padding:8px 10px;font-size:.82rem;}
+  @media(max-width:900px){ .new-inv-grid{grid-template-columns:1fr 1fr;} }
+  .reset-link{font-size:.78rem;color:var(--ink3);font-weight:600;}
+  .reset-link:hover{color:var(--ink);}
+
+  .sim-overlay{position:fixed;inset:0;background:rgba(10,10,14,.5);z-index:500;opacity:0;pointer-events:none;transition:opacity .25s;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .sim-overlay.open{opacity:1;pointer-events:auto;}
+  .sim-modal{background:var(--surface);border-radius:22px;max-width:380px;width:100%;box-shadow:var(--shadow-lg);padding:24px;}
+  .sim-badge{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;background:var(--surface2);color:var(--ink2);padding:5px 12px;border-radius:20px;margin-bottom:14px;}
+  .sim-to{font-size:.85rem;font-weight:700;margin-bottom:10px;}
+  .sim-bubble{background:#d9fdd3;border-radius:14px;border-bottom-right-radius:4px;padding:12px 16px;font-size:.85rem;line-height:1.5;white-space:pre-line;margin-bottom:14px;}
+  .sim-note{font-size:.76rem;color:var(--ink3);line-height:1.5;margin-bottom:16px;}
+</style>
+</head>
+<body>
+
+<div class="demo-topbar">
+  <div class="demo-topbar-inner">
+    <div class="demo-brand"><span class="logo">systema<span>IA</span></span><span class="sep">/</span><span class="label">Painel Financeiro</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="demo-tag">Demonstração</span>
+      <a href="../index.html" class="demo-back">← voltar ao site</a>
+      <a href="https://saas-flow-eight.vercel.app/signup?utm_source=site&amp;utm_medium=demo&amp;utm_campaign=produto&amp;utm_content=financeiro" class="demo-cta">Testar grátis 7 dias →</a>
+    </div>
+  </div>
+</div>
+<div class="demo-banner">Isso é uma <strong>demonstração</strong> — clique em "Cobrar" pra ver uma simulação do lembrete de cobrança. <a href="#" class="reset-link" onclick="resetDemo();return false;" style="margin-left:8px;">↺ Restaurar exemplo</a></div>
+
+<div class="demo-shell">
+  <div class="demo-page-head">
+    <h1>Financeiro</h1>
+    <p>Controle de cobranças e recebimentos</p>
+  </div>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <div class="panel card new-inv-form">
+    <div class="new-inv-grid">
+      <div class="field"><label>Cliente</label><input type="text" id="newInvClient" placeholder="Nome" /></div>
+      <div class="field"><label>WhatsApp</label><input type="text" id="newInvPhone" placeholder="(DDD) 90000-0000" /></div>
+      <div class="field"><label>Descrição</label><input type="text" id="newInvDesc" placeholder="Ex: Assinatura mensal" /></div>
+      <div class="field"><label>Valor (R$)</label><input type="number" id="newInvValue" min="0" placeholder="0" /></div>
+      <div class="field"><label>Vencimento</label><input type="text" id="newInvDue" placeholder="dd/mm" /></div>
+    </div>
+    <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="addInvoice()">+ Nova fatura</button>
+  </div>
+
+  <div class="panel card">
+    <div class="filter-tabs" id="filterTabs"></div>
+    <div style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr></thead>
+      <tbody id="invBody"></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO DA DEMONSTRAÇÃO
+   Troque os valores abaixo pra personalizar essa demo pro cliente
+   ============================================================ */
+const CONFIG = {
+  negocio: 'Studio Bella Estética',
+  whatsapp: '5573988326856',   // WhatsApp da SUA equipe (usado só no botão "Quero o meu" do topo)
+}
+/* PRODUÇÃO — pra virar sistema real, trocar:
+   - localStorage por banco de dados (Supabase/Postgres)
+   - o link wa.me por cobrança automática via Pix/boleto (gateway tipo Asaas, Mercado Pago) + WhatsApp Business API
+*/
+
+const WA_NUMBER = CONFIG.whatsapp
+document.querySelectorAll('.wa-link').forEach(el => {
+  const msg = encodeURIComponent(el.dataset.msg || 'Olá!')
+  el.setAttribute('href', `https://wa.me/${WA_NUMBER}?text=${msg}`)
+  el.setAttribute('target', '_blank')
+  el.setAttribute('rel', 'noopener')
+})
+
+function simulateWhatsApp(toName, toPhone, message){
+  document.getElementById('simTo').textContent = 'Para: ' + toName + (toPhone ? ' · ' + toPhone : '')
+  document.getElementById('simBubble').textContent = message
+  document.getElementById('simOverlay').classList.add('open')
+}
+function closeSim(){ document.getElementById('simOverlay').classList.remove('open') }
+
+const STORAGE_KEY = 'systemaia_financeiro_demo_v1'
+
+function showOwnerAlert(text){
+  let el = document.getElementById('ownerAlert')
+  if (!el) {
+    el = document.createElement('div')
+    el.id = 'ownerAlert'
+    el.className = 'owner-alert'
+    el.innerHTML = `<div><div class="owner-alert-title">Alerta enviado ao WhatsApp do dono</div><div class="owner-alert-text"></div></div>`
+    document.body.appendChild(el)
+  }
+  el.querySelector('.owner-alert-text').textContent = text
+  el.classList.add('show')
+  clearTimeout(el._hideTimer)
+  el._hideTimer = setTimeout(() => el.classList.remove('show'), 4500)
+}
+
+const STATUS_BADGE = { pago:'badge-green', pendente:'badge-amber', atrasado:'badge-red' }
+const STATUS_LABEL = { pago:'Pago', pendente:'Pendente', atrasado:'Atrasado' }
+const FILTERS = { todas:'Todas', pendente:'Pendentes', atrasado:'Atrasadas', pago:'Pagas' }
+
+function seedInvoices(){
+  return [
+    { id:1, client:'Marina Souza', phone:'(11) 98221-4453', desc:'Assinatura mensal', value:997, due:'12/08', status:'pago' },
+    { id:2, client:'Carlos Andrade', phone:'(11) 97765-2210', desc:'Projeto site institucional', value:2400, due:'15/08', status:'pendente' },
+    { id:3, client:'Fernanda Lima', phone:'(21) 98833-9012', desc:'Assinatura mensal', value:997, due:'05/08', status:'atrasado' },
+    { id:4, client:'Roberto Dias', phone:'(41) 99112-3344', desc:'Bot WhatsApp — setup', value:1200, due:'20/08', status:'pendente' },
+    { id:5, client:'Juliana Prado', phone:'(31) 98456-7788', desc:'Assinatura mensal', value:1997, due:'01/08', status:'atrasado' },
+    { id:6, client:'Thiago Nunes', phone:'(51) 99887-6655', desc:'Gestão de tráfego', value:600, due:'18/08', status:'pendente' },
+    { id:7, client:'Patrícia Melo', phone:'(85) 98123-4567', desc:'Assinatura mensal', value:997, due:'10/08', status:'pago' },
+  ]
+}
+
+function loadState(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    const data = JSON.parse(raw)
+    if (!Array.isArray(data.invoices)) return null
+    return data
+  } catch(e) { return null }
+}
+function persist(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ invoices, nextId })) } catch(e) {} }
+
+const saved = loadState()
+let invoices = saved ? saved.invoices : seedInvoices()
+let nextId = saved ? saved.nextId : 8
+let activeFilter = 'todas'
+
+function resetDemo(){
+  if (!confirm('Restaurar as faturas pro estado de exemplo? Isso apaga suas edições nesta demonstração.')) return
+  invoices = seedInvoices()
+  nextId = 8
+  localStorage.removeItem(STORAGE_KEY)
+  renderKpis(); renderTable()
+}
+
+function fmt(n){ return 'R$ ' + Number(n||0).toLocaleString('pt-BR') }
+
+function renderKpis(){
+  const receber = invoices.filter(i=>i.status!=='pago').reduce((s,i)=>s+i.value,0)
+  const recebido = invoices.filter(i=>i.status==='pago').reduce((s,i)=>s+i.value,0)
+  const atrasado = invoices.filter(i=>i.status==='atrasado').reduce((s,i)=>s+i.value,0)
+  const proximo = invoices.filter(i=>i.status==='pendente').sort((a,b)=>a.due.localeCompare(b.due))[0]
+  document.getElementById('kpiGrid').innerHTML = `
+    <div class="kpi-card card"><div class="kpi-label">A receber</div><div class="kpi-value">${fmt(receber)}</div></div>
+    <div class="kpi-card card"><div class="kpi-label">Recebido este mês</div><div class="kpi-value">${fmt(recebido)}</div></div>
+    <div class="kpi-card card"><div class="kpi-label">Em atraso</div><div class="kpi-value" style="color:var(--red)">${fmt(atrasado)}</div></div>
+    <div class="kpi-card card"><div class="kpi-label">Próximo vencimento</div><div class="kpi-value">${proximo ? proximo.due : '—'}</div></div>
+  `
+}
+
+function renderFilters(){
+  document.getElementById('filterTabs').innerHTML = `<div class="filter-tabs-left">${Object.entries(FILTERS).map(([k,label]) =>
+    `<button class="filter-tab ${k===activeFilter?'active':''}" onclick="setFilter('${k}')">${label}</button>`
+  ).join('')}</div>`
+}
+function setFilter(f){ activeFilter = f; renderFilters(); renderTable() }
+
+function renderTable(){
+  const items = activeFilter === 'todas' ? invoices : invoices.filter(i => i.status === activeFilter)
+  document.getElementById('invBody').innerHTML = items.length ? items.map(i => `
+    <tr>
+      <td class="inv-client">${i.client}</td>
+      <td style="color:var(--ink2)">${i.desc}</td>
+      <td>${fmt(i.value)}</td>
+      <td style="color:var(--ink3)">${i.due}</td>
+      <td><span class="badge ${STATUS_BADGE[i.status]}">${STATUS_LABEL[i.status]}</span></td>
+      <td>
+        <div class="inv-actions">
+          ${i.status !== 'pago' ? `<a href="#" class="btn btn-ghost btn-sm" onclick="cobrar(${i.id});return false;">Cobrar</a>` : ''}
+          ${i.status !== 'pago' ? `<button class="btn btn-primary btn-sm" onclick="marcarPago(${i.id})">Marcar pago</button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="deleteInvoice(${i.id})">Excluir</button>
+        </div>
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="6"><div class="empty-state">Nenhuma fatura nessa categoria</div></td></tr>`
+}
+
+function addInvoice(){
+  const client = document.getElementById('newInvClient').value.trim()
+  const desc = document.getElementById('newInvDesc').value.trim()
+  const value = parseFloat(document.getElementById('newInvValue').value)
+  if (!client || !desc || !Number.isFinite(value)) return
+  invoices.push({
+    id: nextId++, client, phone: document.getElementById('newInvPhone').value.trim(),
+    desc, value, due: document.getElementById('newInvDue').value.trim() || '—', status:'pendente',
+  })
+  document.getElementById('newInvClient').value = ''
+  document.getElementById('newInvPhone').value = ''
+  document.getElementById('newInvDesc').value = ''
+  document.getElementById('newInvValue').value = ''
+  document.getElementById('newInvDue').value = ''
+  persist()
+  renderKpis(); renderTable()
+}
+
+function deleteInvoice(id){
+  if (!confirm('Excluir essa fatura?')) return
+  invoices = invoices.filter(i => i.id !== id)
+  persist()
+  renderKpis(); renderTable()
+}
+
+function marcarPago(id){
+  const inv = invoices.find(i => i.id === id)
+  inv.status = 'pago'
+  persist()
+  renderKpis(); renderTable()
+}
+
+function cobrar(id){
+  const inv = invoices.find(i => i.id === id)
+  const msg = `Olá ${inv.client}! Passando pra lembrar da fatura "${inv.desc}" no valor de ${fmt(inv.value)}, com vencimento em ${inv.due}. Qualquer dúvida estou à disposição!\n\n[Mensagem gerada pelo painel financeiro de demonstração]`
+  simulateWhatsApp(inv.client, inv.phone, msg)
+}
+
+renderKpis()
+renderFilters()
+renderTable()
+
+if (!saved) {
+  setTimeout(() => {
+    const alvo = invoices.find(i => i.id === 2)
+    if (alvo && alvo.status === 'pendente') {
+      alvo.status = 'atrasado'
+      persist()
+      renderKpis(); renderTable()
+      showOwnerAlert(`Fatura atrasada: ${alvo.client} — ${fmt(alvo.value)} (venceu em ${alvo.due}).`)
+    }
+  }, 6000)
+}
+</script>
+
+<div class="sim-overlay" id="simOverlay" onclick="if(event.target===this) closeSim()">
+  <div class="sim-modal">
+    <div class="sim-badge">Simulação de envio</div>
+    <div class="sim-to" id="simTo"></div>
+    <div class="sim-bubble" id="simBubble"></div>
+    <p class="sim-note">Nenhuma mensagem real foi enviada — isso é uma demonstração. Números de exemplo não recebem contato real.</p>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="closeSim()">Entendi</button>
+  </div>
+</div>
+</body>
+</html>

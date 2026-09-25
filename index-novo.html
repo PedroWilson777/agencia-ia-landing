@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>systemaIA — Sistemas personalizados, automação e IA para o seu negócio</title>
+  <meta name="description" content="Sistemas personalizados, automação com inteligência artificial, atendimento via WhatsApp, CRM, dashboards e sites — construídos sob medida para a sua operação." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg:#fafafa;
+      --bg-soft:#f3f3f5;
+      --surface:#ffffff;
+      --surface2:#f6f6f8;
+      --line:#e7e7ea;
+      --line-strong:#d8d8dd;
+      --ink:#131316;
+      --ink2:#57575f;
+      --ink3:#9c9ca4;
+      --black:#0c0c0e;
+      --white:#ffffff;
+      /* Cor funcional de sucesso/confirmação. Verde discreto de propósito: o
+         preto e branco continua sendo a identidade; o verde só aparece onde
+         significa "deu certo" (horário confirmado, item incluído no plano). */
+      --ok:#1f9d63;
+      --ok-soft:#e8f5ee;
+      --ok-ink:#157a4c;
+      --shadow-sm:0 1px 3px rgba(18,18,22,.06);
+      --shadow-md:0 14px 34px rgba(18,18,22,.08);
+      --shadow-lg:0 34px 80px rgba(18,18,22,.13);
+      --shadow-xl:0 60px 140px rgba(18,18,22,.20);
+      --radius:18px;
+      --radius-lg:26px;
+      --ease:cubic-bezier(.16,.84,.24,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{
+      font-family:'Inter',sans-serif;color:var(--ink);line-height:1.6;overflow-x:hidden;
+      background:
+        radial-gradient(ellipse 1300px 900px at 8% -12%, rgba(18,18,22,.22), transparent 60%),
+        radial-gradient(ellipse 1100px 900px at 105% 4%, rgba(18,18,22,.16), transparent 56%),
+        radial-gradient(ellipse 1000px 1000px at 50% 108%, rgba(18,18,22,.14), transparent 58%),
+        radial-gradient(ellipse 1600px 500px at 50% 45%, rgba(18,18,22,.05), transparent 65%),
+        linear-gradient(180deg, #f1f1f3 0%, #fbfbfc 22%, #f6f6f8 55%, #eeeef0 100%),
+        linear-gradient(rgba(18,18,22,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(18,18,22,.045) 1px, transparent 1px),
+        var(--bg);
+      background-size:auto,auto,auto,auto,auto,44px 44px,44px 44px;
+      background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,repeat,repeat;
+      background-attachment:fixed;
+    }
+    body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse 1400px 900px at 50% 40%, transparent 45%, rgba(10,10,14,.10) 100%);}
+    a{color:inherit;text-decoration:none;}
+    ul{list-style:none;}
+    button{font-family:inherit;cursor:pointer;border:none;outline:none;background:none;}
+    img{max-width:100%;display:block;}
+    .container{width:100%;max-width:1160px;margin:0 auto;padding:0 24px;}
+    .section{padding:130px 0;}
+    .label{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .label::before{content:'';width:16px;height:1px;background:var(--ink3);}
+    .section-title{font-size:clamp(1.9rem,4vw,3.1rem);font-weight:800;line-height:1.14;letter-spacing:-.02em;margin-bottom:18px;}
+    .section-sub{font-size:1.08rem;color:var(--ink2);max-width:560px;}
+    .center{text-align:center;margin-left:auto;margin-right:auto;}
+    .center .section-sub{margin-left:auto;margin-right:auto;}
+
+    .btn{position:relative;display:inline-flex;align-items:center;gap:9px;padding:15px 30px;border-radius:50px;font-size:.95rem;font-weight:600;cursor:pointer;transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .25s;}
+    .btn-primary{background:var(--black);color:#fff;box-shadow:var(--shadow-md);}
+    .btn-primary:hover{box-shadow:var(--shadow-lg);}
+    .btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line-strong);}
+    .btn-ghost:hover{border-color:var(--ink3);box-shadow:var(--shadow-sm);}
+    .btn-arrow{transition:transform .3s var(--ease);}
+    .btn:hover .btn-arrow{transform:translateX(3px);}
+    .btn-wrap{display:inline-block;}
+
+    .pill{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line-strong);border-radius:30px;padding:7px 16px;font-size:.8rem;font-weight:600;color:var(--ink2);box-shadow:var(--shadow-sm);}
+    .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--ink);animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 0;transition:all .3s;}
+    nav.scrolled{padding:14px 0;background:rgba(250,250,250,.75);backdrop-filter:blur(18px) saturate(160%);border-bottom:1px solid var(--line);}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;}
+    .nav-logo{font-size:1.05rem;font-weight:800;letter-spacing:-.02em;}
+    .nav-logo span{color:var(--ink3);}
+    .nav-links{display:flex;align-items:center;gap:34px;}
+    .nav-links a{font-size:.88rem;font-weight:500;color:var(--ink2);transition:color .2s;}
+    .nav-links a:hover{color:var(--ink);}
+    .nav-cta{font-size:.82rem;padding:11px 22px;}
+    .nav-actions{display:flex;align-items:center;gap:20px;}
+    .nav-client-access{font-size:.88rem;font-weight:500;color:var(--ink2);transition:color .2s;white-space:nowrap;}
+    .nav-client-access:hover{color:var(--ink);}
+
+    /* MAGNETIC */
+    .magnetic{will-change:transform;}
+
+    /* HERO */
+    @keyframes heroIn{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes heroInCard{from{opacity:0;transform:translateY(30px) scale(.95);}to{opacity:1;transform:translateY(0) scale(1);}}
+    @keyframes heroInCrm{from{opacity:0;transform:translateY(30px) scale(.95);}to{opacity:.55;transform:translateY(0) scale(1);}}
+    .hero{min-height:100vh;display:flex;align-items:center;padding:150px 0 90px;position:relative;overflow:hidden;}
+    .hero::before{content:'';position:absolute;top:-14%;left:38%;width:1000px;height:800px;transform:translateX(-50%);background:radial-gradient(ellipse, rgba(18,18,22,.09), transparent 62%);pointer-events:none;z-index:0;}
+    .hero::after{content:'';position:absolute;top:8%;right:-10%;width:640px;height:640px;background:radial-gradient(ellipse, rgba(18,18,22,.06), transparent 65%);pointer-events:none;z-index:0;}
+    /* Static SVG backdrop — flowing lines + connection nodes, light-blue
+       tones, matching the reference the client sent. Pure vector (no raster
+       image, no animation) so it stays crisp and never causes the scroll
+       jank a continuously-animated photo did before. */
+    .hero-deco{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.8;}
+    .hero .pill{animation:heroIn .7s var(--ease) both;}
+    .hero h1{animation:heroIn .8s var(--ease) .08s both;}
+    .hero p{animation:heroIn .8s var(--ease) .16s both;}
+    .hero-btns{animation:heroIn .8s var(--ease) .24s both;}
+    .hero-note{animation:heroIn .8s var(--ease) .32s both;}
+    .hero-stage .float-card{animation:heroInCard .9s var(--ease) both;}
+    .hero-stage .stage-agenda-main{animation-delay:.2s;}
+    .hero-stage .stage-money{animation-delay:.34s;}
+    .hero-stage .stage-client{animation-delay:.46s;}
+    .hero-inner{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;position:relative;z-index:2;}
+    .hero h1{font-size:clamp(2.3rem,4.6vw,3.7rem);font-weight:800;line-height:1.08;letter-spacing:-.03em;margin:22px 0 22px;}
+    .hero p{font-size:1.12rem;color:var(--ink2);max-width:480px;margin-bottom:34px;}
+    .hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+    .hero-btns-sub{margin-bottom:28px;}
+    .hero-link{font-size:.85rem;font-weight:600;color:var(--ink2);border-bottom:1px solid var(--line-strong);padding-bottom:2px;transition:color .2s,border-color .2s;}
+    .hero-link:hover{color:var(--ink);border-color:var(--ink);}
+    .hero-note{font-size:.85rem;color:var(--ink3);}
+    .hero-demo-btn{display:inline-flex;align-items:center;gap:9px;}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:#3ed67a;flex-shrink:0;animation:liveDotPulse 1.8s infinite;}
+    @keyframes liveDotPulse{0%{box-shadow:0 0 0 0 rgba(62,214,122,.5);}70%{box-shadow:0 0 0 7px rgba(62,214,122,0);}100%{box-shadow:0 0 0 0 rgba(62,214,122,0);}}
+
+    /* HERO 3D STAGE */
+    .hero-stage{position:relative;perspective:1400px;height:520px;}
+    .float-card{position:absolute;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);will-change:transform;transform-style:preserve-3d;}
+    .win-dots{display:flex;gap:6px;margin-bottom:14px;}
+    .win-dots span{width:8px;height:8px;border-radius:50%;background:var(--line-strong);}
+
+    /* Composição do herói: agenda + recebimentos + cliente. Três cartões só —
+       a versão anterior tinha seis, o que virava ruído. */
+    .dash-bars{display:flex;align-items:flex-end;gap:8px;height:80px;margin-bottom:18px;}
+    .dash-bars i{flex:1;background:linear-gradient(180deg,var(--ink) 0%,#3a3a40 100%);border-radius:6px 6px 2px 2px;opacity:.9;}
+
+    .stage-agenda-main{width:82%;right:-6%;top:2%;padding:24px;z-index:3;box-shadow:var(--shadow-xl);}
+    .mock-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;}
+    .mock-title{font-size:.9rem;font-weight:700;color:var(--ink);}
+    .mock-date{font-size:.72rem;color:var(--ink3);}
+    .mock-slot{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line);font-size:.8rem;}
+    .mock-slot b{font-weight:700;color:var(--ink);min-width:44px;}
+    .mock-slot span{color:var(--ink2);flex:1;}
+    .mock-slot i{font-style:normal;font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--surface2);color:var(--ink3);}
+    .mock-slot i.ok{background:var(--ok-soft);color:var(--ok-ink);}
+    .mock-slot.livre b,.mock-slot.livre span{color:var(--ink3);}
+
+    .stage-money{width:46%;left:-8%;top:26%;padding:20px;z-index:5;}
+    .mock-cap{font-size:.68rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;}
+    .mock-value{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;margin:6px 0 12px;}
+    .mock-bars{display:flex;align-items:flex-end;gap:6px;height:44px;}
+    .mock-bars i{flex:1;background:var(--ok);border-radius:4px 4px 2px 2px;opacity:.85;}
+
+    .stage-client{width:44%;left:-2%;bottom:6%;padding:18px 20px;z-index:6;}
+    .mock-client{display:flex;align-items:center;gap:11px;margin-top:10px;}
+    .mock-avatar{width:34px;height:34px;border-radius:50%;background:var(--black);color:#fff;display:grid;place-items:center;font-size:.72rem;font-weight:700;flex-shrink:0;}
+    .mock-client b{display:block;font-size:.84rem;color:var(--ink);}
+    .mock-client span{font-size:.72rem;color:var(--ink3);}
+
+    /* O documento exige que dado de exemplo seja identificado como tal. */
+    .stage-nota{position:absolute;right:-4%;bottom:-26px;font-size:.68rem;color:var(--ink3);}
+
+    /* PERFIS */
+    .perfis-section{padding-top:0;}
+    .center-label{justify-content:center;}
+    .perfis-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px;}
+    .perfil-card{display:block;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:30px;transition:border-color .25s,box-shadow .25s,transform .25s var(--ease);}
+    .perfil-card:hover{border-color:var(--ink3);box-shadow:var(--shadow-md);transform:translateY(-3px);}
+    .perfil-tag{font-size:1.02rem;font-weight:700;color:var(--ink);margin-bottom:10px;}
+    .perfil-card p{font-size:.95rem;color:var(--ink2);line-height:1.55;}
+    .perfil-plan{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);font-size:.82rem;font-weight:600;color:var(--ink3);}
+
+    /* PLANOS */
+    /* stretch, não start: os três cartões ficam da mesma altura e os botões
+       alinham na mesma linha — com start, cada card tinha altura própria e os
+       botões ficavam em degraus. */
+    .planos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:56px;align-items:stretch;}
+    .plano-card{position:relative;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:32px 28px;}
+    .plano-card.destaque{border-color:var(--ink);box-shadow:var(--shadow-md);}
+    .plano-card.breve{background:var(--surface2);}
+    .plano-tag{position:absolute;top:-11px;left:28px;font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:20px;background:var(--ink);color:#fff;}
+    .plano-tag.suave{background:var(--line-strong);color:var(--ink2);}
+    .plano-nome{font-size:1.05rem;font-weight:700;}
+    .plano-preco{font-size:1.85rem;font-weight:800;letter-spacing:-.02em;margin:8px 0 4px;}
+    .plano-preco span{font-size:.85rem;font-weight:600;color:var(--ink3);letter-spacing:0;}
+    .plano-preco small{display:block;font-size:.72rem;font-weight:600;color:var(--ink3);letter-spacing:0;margin-bottom:2px;}
+    .plano-para{font-size:.86rem;color:var(--ink2);min-height:40px;}
+    .plano-lista{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:10px;flex:1;}
+    .plano-lista li{position:relative;padding-left:24px;font-size:.86rem;color:var(--ink2);line-height:1.45;}
+    .plano-lista li::before{content:'';position:absolute;left:0;top:6px;width:14px;height:8px;border-left:2px solid var(--ok);border-bottom:2px solid var(--ok);transform:rotate(-45deg);}
+    .breve .plano-lista li::before{border-color:var(--ink3);}
+    .plano-btn{width:100%;justify-content:center;margin-top:26px;}
+    .planos-nota{margin-top:34px;text-align:center;font-size:.88rem;color:var(--ink2);}
+    .planos-nota a{font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px;}
+
+    /* INTEGRAÇÕES */
+    .integracoes-section{padding-top:0;}
+    .int-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:52px;}
+    .int-card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;}
+    .int-nome{font-size:.98rem;font-weight:700;margin-bottom:8px;}
+    .int-card p{font-size:.85rem;color:var(--ink2);line-height:1.5;flex:1;}
+    .int-badge{align-self:flex-start;margin-top:18px;font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:5px 11px;border-radius:20px;background:var(--surface2);color:var(--ink3);}
+    .int-badge.ok{background:var(--ok-soft);color:var(--ok-ink);}
+    .int-nota{margin-top:26px;text-align:center;font-size:.82rem;color:var(--ink3);max-width:640px;margin-left:auto;margin-right:auto;line-height:1.55;}
+
+    /* INDICAÇÃO */
+    .indicacao-section{padding-top:0;}
+    .indicacao-box{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:56px;box-shadow:var(--shadow-md);}
+    .indicacao-title{font-size:clamp(1.6rem,2.6vw,2.3rem);}
+    .indicacao-nums{display:flex;flex-direction:column;gap:20px;}
+    .ind-num{display:flex;align-items:baseline;gap:16px;}
+    .ind-num b{font-size:2.2rem;font-weight:800;letter-spacing:-.02em;color:var(--ok);min-width:88px;}
+    .ind-num span{font-size:.88rem;color:var(--ink2);line-height:1.45;}
+    .ind-regra{font-size:.76rem;color:var(--ink3);line-height:1.5;border-top:1px solid var(--line);padding-top:16px;}
+
+    /* SEGURANÇA */
+    .seg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px;}
+    .seg-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:26px;}
+    .seg-item b{display:block;font-size:.95rem;margin-bottom:8px;}
+    .seg-item span{font-size:.88rem;color:var(--ink2);line-height:1.55;}
+
+    /* FAQ */
+    .faq-section{padding-top:0;}
+    .faq-list{max-width:760px;margin:48px auto 0;}
+    .faq-item{border-bottom:1px solid var(--line);}
+    .faq-item summary{list-style:none;cursor:pointer;padding:22px 0;font-size:1rem;font-weight:600;color:var(--ink);display:flex;justify-content:space-between;align-items:center;gap:20px;}
+    .faq-item summary::-webkit-details-marker{display:none;}
+    .faq-item summary::after{content:'+';font-size:1.3rem;font-weight:400;color:var(--ink3);flex-shrink:0;transition:transform .25s var(--ease);}
+    .faq-item[open] summary::after{transform:rotate(45deg);}
+    .faq-item p{padding:0 0 22px;font-size:.93rem;color:var(--ink2);line-height:1.65;max-width:660px;}
+
+    /* REVEAL */
+    .reveal{opacity:0;transform:translateY(50px);transition:opacity .8s var(--ease),transform .8s var(--ease);}
+    .reveal.in-view{opacity:1;transform:translateY(0);}
+
+    /* SOLUÇÕES */
+    @keyframes photoFloat{0%,100%{transform:translateY(0) scale(1.02);}50%{transform:translateY(-10px) scale(1.04);}}
+    .sol-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:60px;}
+    .sol-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;padding-top:38px;transition:border-color .3s,box-shadow .35s,transform .4s var(--ease);cursor:pointer;position:relative;overflow:visible;transform-style:preserve-3d;will-change:transform;}
+    .sol-card:hover{transform:translateY(-10px) scale(1.015);}
+    .sol-card::after{content:'';position:absolute;inset:0;border-radius:var(--radius-lg);background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%), rgba(0,0,0,.08), transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none;}
+    .sol-card:hover{border-color:var(--line-strong);box-shadow:var(--shadow-xl);}
+    .sol-card:hover::after{opacity:1;}
+    .sol-card:hover .mini-mock{transform:translateY(-4px);}
+    .sol-card:hover .mini-mock.mm-photo img{animation-play-state:paused;transform:translateY(-12px) scale(1.1);}
+    .sol-more{font-size:.78rem;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px;margin-top:14px;opacity:.6;transition:gap .25s,opacity .25s;}
+    .sol-card:hover .sol-more{gap:10px;opacity:1;}
+    .mini-mock{height:230px;border-radius:16px;background:var(--surface2);border:1px solid var(--line);margin:-12px -12px 20px;position:relative;overflow:hidden;transition:transform .4s var(--ease);box-shadow:var(--shadow-md);}
+    .demo-live-badge{position:absolute;top:12px;left:12px;z-index:2;display:inline-flex;align-items:center;gap:6px;background:rgba(12,12,14,.82);backdrop-filter:blur(6px);color:#fff;font-size:.68rem;font-weight:700;padding:6px 11px 6px 9px;border-radius:20px;letter-spacing:.01em;}
+    .mini-mock.mm-photo{background:#0c0c0e;}
+    .mini-mock.mm-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s var(--ease);animation:photoFloat 6s ease-in-out infinite;z-index:1;will-change:transform;}
+    .mini-mock.mm-photo::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.35) 100%);pointer-events:none;z-index:2;}
+    .sol-body{padding:0 6px;}
+    .sol-title{font-size:1.05rem;font-weight:700;margin-bottom:8px;}
+    .sol-desc{font-size:.86rem;color:var(--ink2);line-height:1.6;}
+
+    /* mini-mock variants */
+    .mm-window .mm-dots{display:flex;gap:4px;margin-bottom:10px;}
+    .mm-window .mm-dots span{width:6px;height:6px;border-radius:50%;background:var(--line-strong);}
+    .mm-window .mm-line{height:6px;border-radius:3px;background:var(--line-strong);margin-bottom:6px;}
+    .mm-window .mm-line:nth-child(3){width:70%;}
+    .mm-window .mm-line:nth-child(4){width:45%;}
+    .mm-nodes i{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--ink);}
+    .mm-nodes svg{position:absolute;inset:0;width:100%;height:100%;}
+    .mm-chat{display:flex;flex-direction:column;gap:6px;justify-content:center;}
+    .mm-chat .b{padding:6px 10px;border-radius:10px;font-size:.68rem;max-width:70%;}
+    .mm-chat .b.a{background:var(--line);align-self:flex-start;border-bottom-left-radius:3px;}
+    .mm-chat .b.b2{background:var(--ink);color:#fff;align-self:flex-end;border-bottom-right-radius:3px;}
+    .mm-funnel{display:flex;flex-direction:column;gap:6px;justify-content:center;}
+    .mm-funnel i{height:12px;border-radius:4px;background:var(--ink);opacity:.85;}
+    .mm-funnel i:nth-child(1){width:100%;}
+    .mm-funnel i:nth-child(2){width:70%;opacity:.6;}
+    .mm-funnel i:nth-child(3){width:42%;opacity:.4;}
+    .mm-chart{display:flex;align-items:flex-end;gap:6px;padding-top:8px;}
+    .mm-chart i{flex:1;background:var(--ink);border-radius:3px 3px 0 0;opacity:.85;}
+    .mm-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;align-content:center;}
+    .mm-cal i{aspect-ratio:1;border-radius:3px;background:var(--line);}
+    .mm-cal i.on{background:var(--ink);}
+    .mm-browser{display:flex;flex-direction:column;}
+    .mm-browser .bar{display:flex;gap:4px;margin-bottom:8px;}
+    .mm-browser .bar span{width:5px;height:5px;border-radius:50%;background:var(--line-strong);}
+    .mm-browser .blocks{display:grid;grid-template-columns:1fr 1fr;gap:5px;flex:1;}
+    .mm-browser .blocks i{background:var(--line);border-radius:4px;}
+    .mm-integ{position:relative;}
+    .mm-integ i{position:absolute;width:22px;height:22px;border-radius:7px;background:var(--surface);border:1.5px solid var(--ink);}
+
+    /* COMO FUNCIONA */
+    .steps-wrap{position:relative;margin-top:70px;}
+    .steps-line-track{position:absolute;top:32px;left:6%;right:6%;height:2px;background:var(--line);}
+    .steps-line-fill{position:absolute;top:0;left:0;height:100%;width:0%;background:var(--ink);transform-origin:left;}
+    .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative;}
+    .step-card{text-align:left;}
+    .step-icon-wrap{position:relative;width:64px;height:64px;margin-bottom:22px;}
+    .step-icon{width:64px;height:64px;border-radius:18px;background:var(--surface);border:1.5px solid var(--line-strong);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);transition:transform .4s var(--ease),box-shadow .4s,border-color .4s;position:relative;z-index:2;}
+    .step-icon svg{width:26px;height:26px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+    .step-num{position:absolute;bottom:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:var(--surface);border:1.5px solid var(--line-strong);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;z-index:3;transition:background .4s,color .4s,border-color .4s;}
+    .step-card.active .step-icon{border-color:var(--black);box-shadow:var(--shadow-lg);transform:translateY(-6px) scale(1.05);}
+    .step-card.active .step-num{background:var(--black);color:#fff;border-color:var(--black);}
+    .step-title{font-size:1.02rem;font-weight:700;margin-bottom:8px;}
+    .step-desc{font-size:.87rem;color:var(--ink2);line-height:1.6;}
+    .highlight-row{display:flex;gap:40px;margin-top:64px;flex-wrap:wrap;padding-top:44px;border-top:1px solid var(--line);}
+    .highlight-item{flex:1;min-width:240px;}
+    .highlight-item .hi-num{font-size:.72rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+    .highlight-item p{font-size:1.15rem;font-weight:600;letter-spacing:-.01em;}
+
+    /* DEMONSTRAÇÃO — exploded view */
+    .demo-bg{background:var(--bg-soft);}
+    .demo-pin{position:relative;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .demo-copy{position:absolute;top:9%;left:0;right:0;text-align:center;z-index:10;pointer-events:none;}
+    .demo-stage{position:relative;width:100%;max-width:960px;height:520px;perspective:1600px;margin:0 auto;}
+    .exp-piece{position:absolute;top:50%;left:50%;background:var(--surface);border:1.5px solid var(--line-strong);border-radius:var(--radius);box-shadow:var(--shadow-xl);padding:18px;will-change:transform,opacity;}
+    .exp-piece .exp-label{font-size:.7rem;font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+    .exp-main{width:360px;height:230px;z-index:5;border-color:var(--black);}
+    .exp-main .dash-bars{height:64px;}
+    .exp-main .dash-title{font-size:.72rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;}
+    .exp-crm{width:180px;height:118px;z-index:4;}
+    .exp-agenda{width:160px;height:128px;z-index:4;}
+    .exp-relatorios{width:170px;height:118px;z-index:3;}
+    .exp-chat{width:170px;height:128px;z-index:6;}
+    .exp-automacao{width:160px;height:108px;z-index:3;}
+
+    /* PERSONALIZAÇÃO */
+    @keyframes corePulse{0%,100%{box-shadow:var(--shadow-xl),0 0 0 0 rgba(12,12,14,.12);}50%{box-shadow:var(--shadow-xl),0 0 0 18px rgba(12,12,14,0);}}
+    .custom-stage{position:relative;height:520px;margin-top:60px;}
+    .module-chip{position:absolute;top:50%;left:50%;background:var(--surface);border:1px solid var(--line-strong);border-radius:14px;padding:12px 18px;font-size:.85rem;font-weight:700;box-shadow:var(--shadow-md);will-change:transform,opacity;white-space:nowrap;}
+    .custom-core{position:absolute;top:50%;left:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:var(--black);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;text-align:center;z-index:5;box-shadow:var(--shadow-xl);animation:corePulse 2.6s ease-out infinite;}
+    .custom-lines{position:absolute;inset:0;pointer-events:none;overflow:visible;}
+    .custom-lines line{stroke:var(--ink3);stroke-width:1.5;}
+
+    /* PLANOS */
+    .plans-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:60px;}
+    .plan-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:44px 40px;position:relative;overflow:hidden;transition:box-shadow .35s,border-color .3s,transform .4s var(--ease);transform-style:preserve-3d;will-change:transform;}
+    .plan-card:hover{transform:translateY(-6px);}
+    .plan-card::after{content:'';position:absolute;inset:0;background:radial-gradient(280px circle at var(--mx,50%) var(--my,50%), rgba(0,0,0,.05), transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none;}
+    .plan-card:hover{box-shadow:var(--shadow-xl);border-color:var(--line-strong);}
+    .plan-card:hover::after{opacity:1;}
+    .plan-tag{position:absolute;top:28px;right:32px;background:var(--surface2);border:1px solid var(--line-strong);color:var(--ink2);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:20px;}
+    .plan-name{font-size:.78rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;}
+    .plan-headline{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:16px;line-height:1.25;}
+    .plan-desc{font-size:.95rem;color:var(--ink2);line-height:1.65;margin-bottom:32px;}
+    .plan-btn{width:100%;text-align:center;justify-content:center;}
+
+    /* DESCONTO */
+
+    /* FINAL CTA */
+    .final-cta{background:var(--black);color:#fff;padding:150px 0;text-align:center;position:relative;overflow:hidden;}
+    .final-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 700px 500px at 50% 0%, rgba(255,255,255,.07), transparent 65%);}
+    .final-cta h2{position:relative;font-size:clamp(2.4rem,6vw,4.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.08;}
+    .final-cta h2 .dim{color:rgba(255,255,255,.4);}
+    .final-cta p{position:relative;font-size:1.1rem;color:rgba(255,255,255,.62);max-width:520px;margin:26px auto 40px;}
+    .final-cta .btn-primary{background:#fff;color:var(--black);}
+    .final-wa{position:relative;margin-top:26px;font-size:.85rem;color:rgba(255,255,255,.45);}
+
+    /* FOOTER */
+    footer{background:var(--white);border-top:1px solid var(--line);padding:56px 0 32px;}
+    .footer-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:32px;flex-wrap:wrap;margin-bottom:40px;}
+    .footer-brand p{font-size:.88rem;color:var(--ink3);margin-top:8px;max-width:260px;}
+    .footer-links h4{font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);margin-bottom:14px;}
+    .footer-links ul{display:flex;flex-direction:column;gap:10px;}
+    .footer-links a{font-size:.88rem;color:var(--ink2);transition:color .2s;}
+    .footer-links a:hover{color:var(--ink);}
+    .footer-bottom{border-top:1px solid var(--line);padding-top:24px;display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:var(--ink3);flex-wrap:wrap;gap:12px;}
+
+    /* FAB */
+    .wa-fab{position:fixed;bottom:28px;right:28px;z-index:999;width:58px;height:58px;background:var(--black);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-lg);will-change:transform;}
+    .wa-fab svg{width:26px;height:26px;fill:#fff;}
+
+    /* GALLERY MODAL */
+    .gallery-overlay{position:fixed;inset:0;z-index:1000;background:rgba(10,10,14,.6);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .3s;}
+    .gallery-overlay.open{opacity:1;pointer-events:auto;}
+    .gallery-modal{background:var(--surface);border-radius:28px;max-width:760px;width:100%;max-height:88vh;overflow-y:auto;position:relative;box-shadow:var(--shadow-xl);transform:translateY(24px) scale(.96);transition:transform .4s var(--ease);}
+    .gallery-overlay.open .gallery-modal{transform:translateY(0) scale(1);}
+    .gallery-hero{height:300px;position:relative;overflow:hidden;border-radius:28px 28px 0 0;background:#0c0c0e;}
+    .gallery-hero img{width:100%;height:100%;object-fit:cover;}
+    .gallery-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.6) 100%);}
+    /* 44px é o alvo mínimo de toque; estava 38. Vai a 46 porque o reset da
+       página usa border-box e o valor renderizado ficava 2px abaixo. */
+    .gallery-close{position:absolute;top:20px;right:20px;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.92);color:var(--ink);font-size:1.3rem;line-height:1;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:var(--shadow-md);transition:transform .2s;}
+    .gallery-close:hover{transform:scale(1.08) rotate(90deg);}
+    .gallery-body{padding:36px 40px 40px;}
+    .gallery-title{font-size:1.5rem;font-weight:800;letter-spacing:-.01em;margin-bottom:12px;}
+    .gallery-desc{font-size:.98rem;color:var(--ink2);line-height:1.7;margin-bottom:26px;}
+    .gallery-list{display:grid;gap:11px;margin-bottom:8px;}
+    .gallery-list li{font-size:.9rem;color:var(--ink);display:flex;align-items:center;gap:10px;font-weight:600;}
+    .gallery-list li::before{content:'✓';width:20px;height:20px;border-radius:50%;background:var(--black);color:#fff;font-size:.7rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .gallery-examples{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:26px;padding-top:26px;border-top:1px solid var(--line);}
+    .gallery-examples img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;box-shadow:var(--shadow-sm);transition:transform .3s var(--ease);}
+    .gallery-examples img:hover{transform:scale(1.03);}
+    .gallery-examples-label{font-size:.75rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;grid-column:1/-1;}
+
+    @media(prefers-reduced-motion: reduce){
+      *{animation-duration:.001ms !important;animation-delay:0s !important;transition-duration:.001ms !important;}
+      .reveal{opacity:1;transform:none;}
+      .hero .pill,.hero h1,.hero p,.hero-btns,.hero-note,.hero-stage .float-card{opacity:1;transform:none;animation:none;}
+    }
+
+    @media(max-width:980px){
+      /* background-attachment:fixed is notoriously janky on mobile browsers
+         (iOS Safari and many Android browsers repaint the fixed layer on
+         every scroll frame, which reads as a visible tremor/stutter and
+         also breaks the "stays put" parallax feel it's meant to give).
+         Desktop keeps the fixed parallax background; mobile just scrolls it
+         normally like any other background — the standard, performant fix. */
+      body{background-attachment:scroll;}
+      /* A continuously-running transform animation on a card photo can look
+         like it's trembling while the page scrolls past it on weaker mobile
+         GPUs — freeze it in its resting frame there; desktop keeps the float. */
+      .mini-mock.mm-photo img{animation:none;}
+      .hero-inner{grid-template-columns:1fr;}
+      /* A versão anterior escondia a composição inteira no celular — quem
+         entrava pelo telefone (a maioria do público) nunca via o produto.
+         Aqui a agenda vira um cartão único, em fluxo normal, sem posição
+         absoluta e sem parallax: mostra o produto sem risco de sobreposição. */
+      .hero-stage{height:auto;perspective:none;margin-top:40px;}
+      .hero-stage .float-card{position:static;box-shadow:var(--shadow-md);}
+      .stage-agenda-main{width:100%;padding:22px;}
+      .stage-money,.stage-client{display:none;}
+      .stage-nota{position:static;display:block;margin-top:12px;text-align:right;}
+      .sol-grid{grid-template-columns:1fr 1fr;}
+      .steps-grid{grid-template-columns:1fr 1fr;gap:32px;}
+      .steps-line-track{display:none;}
+      .plans-grid{grid-template-columns:1fr;}
+      .nav-links{display:none;}
+      .perfis-grid{grid-template-columns:1fr;}
+      .planos-grid{grid-template-columns:1fr;}
+      .int-grid{grid-template-columns:1fr 1fr;}
+      .seg-grid{grid-template-columns:1fr;}
+      .indicacao-box{grid-template-columns:1fr;gap:34px;padding:38px 28px;}
+      /* O herói some no celular (regra acima), então as seções seguintes não
+         podem começar coladas no topo como começam no desktop. */
+      .perfis-section{padding-top:88px;}
+      .demo-stage{transform:scale(.72);}
+      .custom-stage{height:420px;}
+    }
+    @media(max-width:600px){
+      .section{padding:88px 0;}
+      /* Em 375px o logo + "Entrar" + o botão não cabem juntos na barra. Some
+         com o botão aqui — a mesma ação continua no herói, nos planos e no CTA
+         final — e mantém "Entrar", que não tem outro ponto de entrada no topo. */
+      .nav-cta{display:none;}
+      /* Em 375px, duas colunas de integração dão 295px de conteúdo em 279px de
+         espaço útil. Uma coluna resolve. */
+      .int-grid{grid-template-columns:1fr;}
+      /* O herói tem 150px de respiro no topo e min-height 100vh, o que no
+         celular vira quase 300px de vazio antes do primeiro texto. Aqui o
+         respiro é o suficiente pra não colar na barra, e a altura passa a ser
+         o conteúdo. */
+      .hero{min-height:0;padding:110px 0 70px;}
+      /* O clamp usa 4.6vw, que em 375px cai no piso de 2.3rem e gasta 5 linhas
+         só com o título — o produto some abaixo da dobra. Aqui o piso é menor,
+         mas continua acima do mínimo legível. */
+      .hero h1{font-size:2rem;margin:16px 0 16px;}
+      .hero p{font-size:1rem;}
+      /* O público é majoritariamente celular. Texto que a pessoa realmente lê
+         pra decidir — descrição do perfil, item do plano, integração, FAQ —
+         sobe para 16px aqui. Nota de rodapé e letra miúda continuam menores,
+         que é o papel delas. */
+      .perfil-card p,.int-card p,.plano-lista li,.faq-item p{font-size:1rem;}
+      .sol-grid{grid-template-columns:1fr;}
+      .steps-grid{grid-template-columns:1fr;}
+      .highlight-row{flex-direction:column;gap:24px;}
+      .demo-stage{transform:scale(.5);}
+      .custom-stage{height:360px;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="container">
+      <div class="nav-inner">
+        <div class="nav-logo">systema<span>IA</span></div>
+        <div class="nav-links">
+          <a href="#solucoes">Soluções</a>
+          <a href="#perfis">Para quem é</a>
+          <a href="#integracoes">Integrações</a>
+          <a href="#planos">Planos</a>
+          <a href="#indicacao">Indique e ganhe</a>
+        </div>
+        <!-- Agrupados: .nav-inner é space-between, então soltar os dois como
+             irmãos diretos espalharia os itens e desalinharia a barra. -->
+        <div class="nav-actions">
+          <a href="https://saas-flow-eight.vercel.app/login" class="nav-client-access">Entrar</a>
+          <a href="https://saas-flow-eight.vercel.app/signup" class="btn btn-primary nav-cta magnetic">Testar grátis</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="inicio">
+    <svg class="hero-deco" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="waveGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#bcd9f7" stop-opacity="0"/>
+          <stop offset="50%" stop-color="#8fb8ec" stop-opacity=".38"/>
+          <stop offset="100%" stop-color="#6b9fe0" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="waveGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#a8c8f0" stop-opacity="0"/>
+          <stop offset="50%" stop-color="#bcd9f7" stop-opacity=".3"/>
+          <stop offset="100%" stop-color="#dceaf9" stop-opacity="0"/>
+        </linearGradient>
+        <radialGradient id="dotGlow">
+          <stop offset="0%" stop-color="#8fb8ec" stop-opacity=".7"/>
+          <stop offset="100%" stop-color="#8fb8ec" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <path d="M -50,420 C 200,340 380,480 620,380 C 860,280 1000,420 1260,340" stroke="url(#waveGrad1)" stroke-width="60" fill="none" stroke-linecap="round"/>
+      <path d="M -50,220 C 220,300 420,140 680,220 C 920,290 1050,160 1260,240" stroke="url(#waveGrad2)" stroke-width="44" fill="none" stroke-linecap="round"/>
+      <g stroke="#a8c8f0" stroke-width="1" opacity=".5">
+        <line x1="980" y1="80" x2="1080" y2="140"/>
+        <line x1="1080" y1="140" x2="1160" y2="90"/>
+        <line x1="1080" y1="140" x2="1120" y2="220"/>
+        <line x1="1160" y1="90" x2="1200" y2="160"/>
+      </g>
+      <g fill="#8fb8ec">
+        <circle cx="980" cy="80" r="3"/>
+        <circle cx="1080" cy="140" r="4"/>
+        <circle cx="1160" cy="90" r="3"/>
+        <circle cx="1120" cy="220" r="3"/>
+        <circle cx="1200" cy="160" r="3"/>
+      </g>
+      <g stroke="#a8c8f0" stroke-width="1" opacity=".4">
+        <line x1="60" y1="560" x2="140" y2="610"/>
+        <line x1="140" y1="610" x2="100" y2="670"/>
+        <line x1="140" y1="610" x2="220" y2="640"/>
+      </g>
+      <g fill="#8fb8ec">
+        <circle cx="60" cy="560" r="3"/>
+        <circle cx="140" cy="610" r="4"/>
+        <circle cx="100" cy="670" r="3"/>
+        <circle cx="220" cy="640" r="3"/>
+      </g>
+      <circle cx="220" cy="130" r="40" fill="url(#dotGlow)"/>
+      <circle cx="1050" cy="480" r="55" fill="url(#dotGlow)"/>
+    </svg>
+    <div class="container">
+      <div class="hero-inner">
+        <div>
+          <div class="pill"><span class="dot"></span> Planos a partir de R$ 59,90/mês</div>
+          <h1>Organize sua agenda, seus clientes e seu dinheiro em um só lugar.</h1>
+          <p>Um sistema simples para quem trabalha sozinho e para pequenas empresas. Comece com o que precisa e conecte novas funções quando o negócio crescer.</p>
+          <div class="hero-btns">
+            <a href="https://saas-flow-eight.vercel.app/signup" class="btn btn-primary magnetic">Testar grátis por 7 dias <span class="btn-arrow">→</span></a>
+            <a href="#demonstracao" class="btn btn-ghost magnetic hero-demo-btn"><span class="live-dot"></span> Ver uma demonstração</a>
+          </div>
+          <div class="hero-note">Preço final, sem taxa surpresa na assinatura. Cancele quando quiser.</div>
+        </div>
+
+        <!-- Composição do produto real: agenda, clientes e recebimentos, que é
+             o que a pessoa vai usar de fato. Tudo em HTML/CSS de propósito —
+             imagem grande no herói pesa no celular e a versão anterior usava
+             arte 3D neon que não tem nada a ver nem com o site nem com o
+             público. Os dados são de exemplo e estão marcados como tal. -->
+        <div class="hero-stage" id="heroStage">
+          <div class="float-card stage-agenda-main" data-depth=".45">
+            <div class="mock-head">
+              <span class="mock-title">Agenda de hoje</span>
+              <span class="mock-date">Qui, 3 set</span>
+            </div>
+            <div class="mock-slot"><b>09:00</b><span>Ana Paula · Manicure</span><i class="ok">confirmado</i></div>
+            <div class="mock-slot"><b>10:30</b><span>Júlia M. · Sobrancelha</span><i class="ok">confirmado</i></div>
+            <div class="mock-slot livre"><b>13:00</b><span>horário livre</span></div>
+            <div class="mock-slot"><b>15:00</b><span>Carla S. · Pé e mão</span><i>aguardando</i></div>
+          </div>
+
+          <div class="float-card stage-money" data-depth=".8">
+            <div class="mock-cap">Recebido no mês</div>
+            <div class="mock-value">R$ 4.280</div>
+            <div class="mock-bars">
+              <i style="height:42%"></i><i style="height:66%"></i><i style="height:54%"></i><i style="height:88%"></i><i style="height:72%"></i>
+            </div>
+          </div>
+
+          <div class="float-card stage-client" data-depth="1.05">
+            <div class="mock-cap">Cliente</div>
+            <div class="mock-client">
+              <span class="mock-avatar">AP</span>
+              <div>
+                <b>Ana Paula</b>
+                <span>12 atendimentos</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stage-nota">Tela de exemplo, com dados fictícios.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARA QUEM É -->
+  <section class="section perfis-section" id="perfis">
+    <div class="container">
+      <div class="center">
+        <div class="label center-label">Para quem é</div>
+        <h2 class="section-title">Feito para o tamanho do seu negócio hoje.<br>Pronto para crescer amanhã.</h2>
+      </div>
+      <div class="perfis-grid">
+        <a class="perfil-card reveal" href="#planos">
+          <div class="perfil-tag">Trabalho sozinho</div>
+          <p>Agenda, clientes e recebimentos sem caderno e sem planilha.</p>
+          <div class="perfil-plan">Plano Solo · R$ 59,90/mês</div>
+        </a>
+        <a class="perfil-card reveal" href="#planos">
+          <div class="perfil-tag">Tenho uma equipe</div>
+          <p>Horários, profissionais, clientes e resultados organizados.</p>
+          <div class="perfil-plan">Plano Equipe · R$ 107,90/mês</div>
+        </a>
+        <a class="perfil-card reveal" href="#planos">
+          <div class="perfil-tag">Tenho uma pequena empresa</div>
+          <p>Vendas, financeiro, estoque e indicadores conectados.</p>
+          <div class="perfil-plan">Planos maiores · sob consulta</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- O QUE PODEMOS CRIAR -->
+  <section class="section" id="solucoes">
+    <div class="container">
+      <div class="label">14 sistemas já prontos</div>
+      <h2 class="section-title">Módulos que já construímos,<br>prontos pra entrar no seu sistema.</h2>
+      <p class="section-sub">Clique em qualquer card e veja como funciona na prática — cada um se conecta formando exatamente a solução que sua operação precisa.</p>
+      <div class="sol-grid">
+        <div class="sol-card reveal" onclick="openGallery('sistemas')">
+          <div class="mini-mock mm-photo"><img src="images/services/sistemas-personalizados.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">Sistemas personalizados</div>
+            <div class="sol-desc">Software construído do zero em torno do seu processo — não um template adaptado. Você define o fluxo, a gente constrói exatamente aquilo.</div>
+            <div class="sol-more">Ver detalhes <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+        <div class="sol-card reveal" onclick="openGallery('automacao')">
+          <div class="mini-mock mm-photo"><img src="images/services/automacao-ia.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">Automação com IA</div>
+            <div class="sol-desc">Processos repetitivos rodando sozinhos: qualificação de lead, resposta padrão, organização de dados. A IA decide o simples e te chama quando precisa.</div>
+            <div class="sol-more">Ver detalhes <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+        <div class="sol-card reveal" onclick="openGallery('whatsapp')">
+          <div class="mini-mock mm-photo"><img src="images/services/bot-whatsapp.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">Atendimento via WhatsApp</div>
+            <div class="sol-desc">Bot inteligente que responde, tira dúvida, agenda e qualifica — 24 horas por dia, com o tom de voz do seu negócio.</div>
+            <div class="sol-more">Ver detalhes <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+        <div class="sol-card reveal" onclick="openGallery('crm')">
+          <div class="mini-mock mm-photo"><img src="images/services/crm-funil.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">CRM e funil de vendas</div>
+            <div class="sol-desc">Cada lead organizado por etapa, com histórico completo de conversa e follow-up automático. Nada mais se perde entre planilha e WhatsApp.</div>
+            <div class="sol-more">Ver detalhes <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+        <div class="sol-card reveal" onclick="openGallery('dashboard')">
+          <div class="mini-mock mm-photo"><img src="images/services/relatorio-mensal.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">Dashboard administrativo</div>
+            <div class="sol-desc">Métricas do negócio reunidas em um painel único — atendimento, vendas, conversão — sem esperar relatório manual.</div>
+            <div class="sol-more">Ver detalhes <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+        <div class="sol-card reveal" onclick="openGallery('agenda')">
+          <div class="mini-mock mm-photo"><img src="images/services/agenda-inteligente.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">Agenda inteligente</div>
+            <div class="sol-desc">Marcação automática direto pelo WhatsApp, lembrete antes do horário e confirmação sem trocar mensagem manualmente.</div>
+            <div class="sol-more">Ver detalhes <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+        <div class="sol-card reveal" onclick="openGallery('sites')">
+          <div class="mini-mock mm-photo"><img src="images/services/site-completo.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">Sites e plataformas</div>
+            <div class="sol-desc">Sua presença digital com performance real — carrega rápido, funciona no celular, leva direto pro WhatsApp.</div>
+            <div class="sol-more">Ver exemplos <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+        <div class="sol-card reveal" onclick="openGallery('integracoes')">
+          <div class="mini-mock mm-photo"><img src="images/services/integracoes.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">Integrações</div>
+            <div class="sol-desc">Suas ferramentas conversando entre si — planilha, CRM, agenda, financeiro. Sem retrabalho, sem dado duplicado.</div>
+            <div class="sol-more">Ver detalhes <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+        <div class="sol-card reveal" onclick="openGallery('financeiro')">
+          <div class="mini-mock mm-photo"><img src="images/services/financeiro.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">Financeiro</div>
+            <div class="sol-desc">Cobrança automática, controle de pagamento e inadimplência — sem planilha, sem cobrar cliente na mão.</div>
+            <div class="sol-more">Ver detalhes <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+        <div class="sol-card reveal" onclick="openGallery('clientes')">
+          <div class="mini-mock mm-photo"><img src="images/services/clientes.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">Gestão de clientes</div>
+            <div class="sol-desc">Ficha completa de cada cliente — histórico, preferências, contato — tudo centralizado num só lugar.</div>
+            <div class="sol-more">Ver detalhes <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+        <div class="sol-card reveal" onclick="openGallery('catalogo')">
+          <div class="mini-mock mm-photo"><img src="images/services/catalogo.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">Catálogo e vitrine</div>
+            <div class="sol-desc">Seus produtos organizados em vitrine digital, integrada ao WhatsApp — cliente escolhe e já manda o pedido.</div>
+            <div class="sol-more">Ver detalhes <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+        <div class="sol-card reveal" onclick="openGallery('suporte')">
+          <div class="mini-mock mm-photo"><img src="images/services/suporte.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">Central de suporte</div>
+            <div class="sol-desc">Chamados organizados por prioridade, com histórico de atendimento — nada se perde entre um chamado e outro.</div>
+            <div class="sol-more">Ver detalhes <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+        <div class="sol-card reveal" onclick="openGallery('estoque')">
+          <div class="mini-mock mm-photo"><img src="images/services/estoque.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">Controle de estoque</div>
+            <div class="sol-desc">Cada produto com sua quantidade atualizada e alerta automático de reposição, antes de faltar de verdade.</div>
+            <div class="sol-more">Ver detalhes <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+        <div class="sol-card reveal" onclick="openGallery('funilagenda')">
+          <div class="mini-mock mm-photo"><img src="images/services/funil-agenda.png" alt="" onerror="this.style.display='none'"></div>
+          <div class="sol-body">
+            <div class="sol-title">Funil + Agenda integrados</div>
+            <div class="sol-desc">Quando o lead chega em "Negociando", o sistema já oferece o agendamento — seus módulos conversando entre si de verdade.</div>
+            <div class="sol-more">Ver detalhes <span class="btn-arrow">→</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section class="section" id="como-funciona">
+    <div class="container">
+      <div class="label">Como funciona</div>
+      <h2 class="section-title">Do pedido ao sistema no ar.</h2>
+      <p class="section-sub">Sistemas personalizados para sua operação, sem complicar o processo.</p>
+      <div class="steps-wrap">
+        <div class="steps-line-track"><div class="steps-line-fill" id="stepsLine"></div></div>
+        <div class="steps-grid">
+          <div class="step-card" data-step="1">
+            <div class="step-icon-wrap">
+              <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+              <div class="step-num">01</div>
+            </div>
+            <div class="step-title">Você conta sua necessidade</div>
+            <div class="step-desc">Conta como sua operação funciona hoje e onde ela trava.</div>
+          </div>
+          <div class="step-card" data-step="2">
+            <div class="step-icon-wrap">
+              <div class="step-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
+              <div class="step-num">02</div>
+            </div>
+            <div class="step-title">Planejamos sua solução</div>
+            <div class="step-desc">Desenhamos o sistema certo — nem a mais, nem a menos do que você precisa.</div>
+          </div>
+          <div class="step-card" data-step="3">
+            <div class="step-icon-wrap">
+              <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+              <div class="step-num">03</div>
+            </div>
+            <div class="step-title">Desenvolvemos seu sistema</div>
+            <div class="step-desc">Construímos cada módulo e testamos junto com a sua operação real.</div>
+          </div>
+          <div class="step-card" data-step="4">
+            <div class="step-icon-wrap">
+              <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+              <div class="step-num">04</div>
+            </div>
+            <div class="step-title">Você recebe e começa a usar</div>
+            <div class="step-desc">Sistema no ar, treinamento incluso, e você já está operando com ele.</div>
+          </div>
+        </div>
+      </div>
+      <div class="highlight-row">
+        <div class="highlight-item reveal">
+          <div class="hi-num">Sob medida</div>
+          <p>Sistemas personalizados para sua operação.</p>
+        </div>
+        <div class="highlight-item reveal">
+          <div class="hi-num">Prazo</div>
+          <p>Entrega de projetos a partir de 1 semana, dependendo da complexidade.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMONSTRAÇÃO -->
+  <section class="demo-bg" id="demonstracao">
+    <div class="demo-pin" id="demoPin">
+      <div class="demo-copy">
+        <div class="label center">Demonstração</div>
+        <h2 class="section-title">Um sistema. Do seu jeito.</h2>
+        <p class="section-sub center">Escolha apenas as ferramentas que sua operação precisa.</p>
+      </div>
+      <div class="demo-stage" id="demoStage">
+        <div class="exp-piece exp-main" id="expMain">
+          <div class="dash-title">Sistema completo</div>
+          <div class="dash-bars"><i style="height:40%"></i><i style="height:70%"></i><i style="height:52%"></i><i style="height:85%"></i><i style="height:60%"></i><i style="height:95%"></i></div>
+        </div>
+        <div class="exp-piece exp-crm" id="expCrm"><div class="exp-label">CRM</div><div class="mm-funnel"><i></i><i></i><i></i></div></div>
+        <div class="exp-piece exp-agenda" id="expAgenda"><div class="exp-label">Agenda</div><div class="mm-cal"><i></i><i class="on"></i><i></i><i></i><i class="on"></i><i></i><i></i></div></div>
+        <div class="exp-piece exp-relatorios" id="expRelatorios"><div class="exp-label">Relatórios</div><div class="mm-chart"><i style="height:40%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%"></i></div></div>
+        <div class="exp-piece exp-chat" id="expChat"><div class="exp-label">Chat</div><div class="mm-chat"><div class="b a">Oi!</div><div class="b b2">Já te ajudo</div></div></div>
+        <div class="exp-piece exp-automacao" id="expAutomacao"><div class="exp-label">Automação</div><div class="mm-nodes"><i style="top:30%;left:20%"></i><i style="top:60%;left:60%"></i></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PERSONALIZAÇÃO -->
+  <section class="section" id="personalizacao">
+    <div class="container">
+      <div class="label center">Personalização</div>
+      <h2 class="section-title center">Não adapte sua empresa ao software.<br><strong>Adapte o software à sua empresa.</strong></h2>
+      <div class="custom-stage" id="customStage">
+        <div class="custom-core">seu<br>sistema</div>
+        <svg class="custom-lines" id="customLines"></svg>
+        <div class="module-chip" data-mod="crm">CRM</div>
+        <div class="module-chip" data-mod="whats">WhatsApp</div>
+        <div class="module-chip" data-mod="ia">IA</div>
+        <div class="module-chip" data-mod="agenda">Agenda</div>
+        <div class="module-chip" data-mod="financeiro">Financeiro</div>
+        <div class="module-chip" data-mod="dashboard">Dashboard</div>
+        <div class="module-chip" data-mod="clientes">Clientes</div>
+        <div class="module-chip" data-mod="automacao">Automação</div>
+        <div class="module-chip" data-mod="relatorios">Relatórios</div>
+        <div class="module-chip" data-mod="funil">Funil</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTEGRAÇÕES -->
+  <section class="section integracoes-section" id="integracoes">
+    <div class="container">
+      <div class="center">
+        <div class="label center-label">Integrações</div>
+        <h2 class="section-title">Conecte as ferramentas que você já usa.</h2>
+        <p class="section-sub">Ative somente o necessário. Antes de conectar, você vê as permissões, o que está incluído no plano e quais custos pertencem ao fornecedor externo.</p>
+      </div>
+
+      <!-- O estado de cada item é o estado REAL. "Disponível" só entra quando
+           a conexão funciona de ponta a ponta; o resto fica "em breve". -->
+      <div class="int-grid">
+        <div class="int-card reveal">
+          <div class="int-nome">WhatsApp</div>
+          <p>Confirmação de horário e código de acesso enviados pelo WhatsApp.</p>
+          <span class="int-badge ok">Disponível</span>
+        </div>
+        <div class="int-card reveal">
+          <div class="int-nome">Asaas</div>
+          <p>Cobrança da mensalidade no cartão, com renovação automática.</p>
+          <span class="int-badge">Em breve</span>
+        </div>
+        <div class="int-card reveal">
+          <div class="int-nome">Google Agenda</div>
+          <p>Seus horários sincronizados, sem marcar dois compromissos no mesmo lugar.</p>
+          <span class="int-badge">Em breve</span>
+        </div>
+        <div class="int-card reveal">
+          <div class="int-nome">Meta e Google Ads</div>
+          <p>Campanhas, investimento e resultados num painel só.</p>
+          <span class="int-badge">Em breve</span>
+        </div>
+      </div>
+      <p class="int-nota">Mensagens, anúncios e tarifas cobradas pelo próprio fornecedor não entram na mensalidade — aparecem separados antes de você conectar.</p>
+    </div>
+  </section>
+
+  <!-- PLANOS -->
+  <section class="section" id="planos">
+    <div class="container">
+      <div class="center">
+        <div class="label center-label">Planos</div>
+        <h2 class="section-title">Comece pequeno. Adicione recursos quando precisar.</h2>
+        <p class="section-sub">A mensalidade mostrada já inclui os custos da assinatura systemaIA. Mensagens, anúncios, cobranças feitas pelo seu negócio e serviços externos aparecem separados antes da contratação.</p>
+      </div>
+
+      <!-- Os dois primeiros são os planos que já existem de verdade e podem ser
+           assinados hoje. Os demais estão marcados como "em breve" de propósito:
+           dependem de CRM, estoque e automação, que ainda não são produto. -->
+      <div class="planos-grid">
+        <div class="plano-card reveal">
+          <div class="plano-nome">Solo</div>
+          <div class="plano-preco">R$ 59,90<span>/mês</span></div>
+          <div class="plano-para">Pra quem trabalha sozinho.</div>
+          <ul class="plano-lista">
+            <li>Agenda online com link de agendamento</li>
+            <li>Clientes e histórico</li>
+            <li>Serviços e recebimentos</li>
+            <li>1 profissional · 1 unidade</li>
+          </ul>
+          <a href="https://saas-flow-eight.vercel.app/assinar?plano=solo" class="btn btn-ghost plano-btn magnetic">Assinar Solo</a>
+        </div>
+
+        <div class="plano-card destaque reveal">
+          <div class="plano-tag">Mais escolhido</div>
+          <div class="plano-nome">Equipe</div>
+          <div class="plano-preco">R$ 107,90<span>/mês</span></div>
+          <div class="plano-para">Pra salão, barbearia e estúdio com equipe pequena.</div>
+          <ul class="plano-lista">
+            <li>Tudo do Solo</li>
+            <li>Até 3 profissionais, com agendas separadas</li>
+            <li>Permissões por pessoa</li>
+            <li>Visão financeira da equipe</li>
+          </ul>
+          <a href="https://saas-flow-eight.vercel.app/assinar?plano=equipe" class="btn btn-primary plano-btn magnetic">Assinar Equipe</a>
+        </div>
+
+        <div class="plano-card breve reveal">
+          <div class="plano-tag suave">Em breve</div>
+          <div class="plano-nome">Negócio, Gestão e mais</div>
+          <div class="plano-preco"><small>a partir de</small>R$ 179,90<span>/mês</span></div>
+          <div class="plano-para">Pra oficina, metalúrgica, comércio e prestador com equipe.</div>
+          <ul class="plano-lista">
+            <li>CRM e funil de vendas</li>
+            <li>Financeiro e estoque</li>
+            <li>Catálogo e central de suporte</li>
+            <li>Automação com IA</li>
+          </ul>
+          <a href="#" class="btn btn-ghost plano-btn magnetic wa-link" data-msg="Olá! Tenho uma pequena empresa e quero saber quando os planos Negócio e Gestão vão estar disponíveis.">Quero ser avisado</a>
+        </div>
+      </div>
+
+      <p class="planos-nota">
+        Precisa de algo fora da tabela — várias unidades, regra específica ou desenvolvimento exclusivo?
+        <a href="#" class="wa-link" data-msg="Olá! Preciso de um sistema sob medida para o meu negócio.">Falar sobre um projeto sob medida →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- INDICAÇÃO -->
+  <section class="section indicacao-section" id="indicacao">
+    <div class="container">
+      <div class="indicacao-box">
+        <div>
+          <div class="label">Indique e ganhe</div>
+          <h2 class="section-title indicacao-title">Indique. Seu amigo economiza e você também.</h2>
+          <p class="section-sub">Depois do primeiro mês ativo, gere seu link. Quem assinar recebe 20% na primeira mensalidade. Após o pagamento confirmado, você ganha 10% na próxima.</p>
+        </div>
+        <div class="indicacao-nums">
+          <div class="ind-num"><b>20%</b><span>na primeira mensalidade de quem você indicou</span></div>
+          <div class="ind-num"><b>10%</b><span>na sua próxima mensalidade, após o pagamento confirmar</span></div>
+          <p class="ind-regra">Vale a partir de 30 dias de assinatura ativa. O desconto incide sobre o preço do plano e não acumula com outras campanhas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEGURANÇA -->
+  <section class="section seguranca-section" id="seguranca">
+    <div class="container">
+      <div class="center">
+        <div class="label center-label">Segurança e controle</div>
+        <h2 class="section-title">Você controla o que cada integração pode acessar.</h2>
+        <p class="section-sub">As conexões são autorizadas por empresa, com permissões claras, histórico de sincronização e opção de desconectar. Suas senhas não são compartilhadas com a systemaIA.</p>
+      </div>
+      <div class="seg-grid">
+        <div class="seg-item reveal"><b>Acesso por empresa</b><span>Cada empresa enxerga só os próprios dados. Nada é compartilhado entre clientes.</span></div>
+        <div class="seg-item reveal"><b>Permissões por pessoa</b><span>Você decide quem da sua equipe vê agenda, clientes ou financeiro.</span></div>
+        <div class="seg-item reveal"><b>Desconectar quando quiser</b><span>Toda integração pode ser desligada por você, sem passar pelo suporte.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PERGUNTAS -->
+  <section class="section faq-section" id="faq">
+    <div class="container">
+      <div class="center">
+        <div class="label center-label">Perguntas frequentes</div>
+        <h2 class="section-title">Ainda com dúvida?</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Preciso de cartão para testar?</summary>
+          <p>Não. O teste de 7 dias não pede cartão. Você só informa os dados de pagamento se decidir assinar.</p>
+        </details>
+        <details class="faq-item">
+          <summary>O preço muda depois?</summary>
+          <p>O valor mostrado é o total da mensalidade, já com as taxas da systemaIA. Mensagens de WhatsApp, anúncios e cobranças que o seu negócio faz aos clientes dele são custos do fornecedor e aparecem separados antes de você contratar.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Posso cancelar quando quiser?</summary>
+          <p>Pode. Ao cancelar, a renovação para e o acesso continua até o fim do período que você já pagou.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Meus dados ficam salvos se eu cancelar?</summary>
+          <p>Sim. Cancelar interrompe a cobrança; não apaga sua conta nem seu histórico.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Serve pro meu tipo de negócio?</summary>
+          <p>Hoje os planos Solo e Equipe atendem quem trabalha com hora marcada — manicure, barbeiro, cabeleireiro, sobrancelha, estética, consultor e técnico. Oficina, metalúrgica e comércio dependem dos planos maiores, que ainda estão em construção.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="final-cta" id="contato">
+    <div class="container">
+      <h2>Chega de perder tempo<br><span class="dim">entre caderno, planilha e mensagens.</span></h2>
+      <p>Organize seu negócio com um plano que cabe no seu momento.</p>
+      <a href="https://saas-flow-eight.vercel.app/signup" class="btn btn-primary magnetic">Começar teste grátis <span class="btn-arrow">→</span></a>
+      <div class="final-wa">Prefere falar antes? WhatsApp · 73 8832-6856</div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <div class="nav-logo">systema<span>IA</span></div>
+          <p>Agenda, clientes e dinheiro organizados num sistema só — para quem trabalha sozinho e para pequenas empresas.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Produto</h4>
+          <ul>
+            <li><a href="#perfis">Para quem é</a></li>
+            <li><a href="#demonstracao">Demonstração</a></li>
+            <li><a href="#integracoes">Integrações</a></li>
+            <li><a href="#planos">Planos e preços</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Conta</h4>
+          <ul>
+            <li><a href="https://saas-flow-eight.vercel.app/signup">Testar grátis por 7 dias</a></li>
+            <li><a href="https://saas-flow-eight.vercel.app/login">Entrar</a></li>
+            <li><a href="#indicacao">Indique e ganhe</a></li>
+            <li><a href="#faq">Perguntas frequentes</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Contato</h4>
+          <ul>
+            <li><a href="#" class="wa-link" data-msg="Olá! Vi o site e gostaria de saber mais.">WhatsApp · 73 8832-6856</a></li>
+            <li><a href="#" class="wa-link" data-msg="Olá! Preciso de um sistema sob medida para o meu negócio.">Projeto sob medida</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 systemaIA · Todos os direitos reservados</span>
+        <span>Planos a partir de R$ 59,90/mês.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- GALLERY MODAL -->
+  <div class="gallery-overlay" id="galleryOverlay" onclick="if(event.target===this) closeGallery()">
+    <div class="gallery-modal">
+      <button class="gallery-close" onclick="closeGallery()" aria-label="Fechar">&times;</button>
+      <div class="gallery-hero"><img id="galleryImg" src="" alt=""></div>
+      <div class="gallery-body">
+        <div class="gallery-title" id="galleryTitle"></div>
+        <div class="gallery-desc" id="galleryDesc"></div>
+        <a href="#" class="btn btn-primary" id="galleryDemoLink" target="_blank" rel="noopener" style="display:none;margin-bottom:24px;">Testar demonstração ao vivo <span class="btn-arrow">→</span></a>
+        <ul class="gallery-list" id="galleryList"></ul>
+        <div class="gallery-examples" id="galleryExamples" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB WhatsApp -->
+  <a href="#" class="wa-fab magnetic wa-link" data-msg="Olá! Vi o site e gostaria de solicitar um orçamento para desenvolver um sistema personalizado." title="Falar no WhatsApp">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script>
+    const WA_NUMBER = '5573988326856'
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const isDesktop = window.matchMedia('(min-width: 980px)').matches
+
+    // Detalhes de cada solução — abre no clique do card
+    const SERVICE_DATA = {
+      sistemas: {
+        img: 'images/services/sistemas-personalizados.png',
+        title: 'Sistemas personalizados',
+        desc: 'Nada de template genérico adaptado ao seu negócio. A gente mapeia como sua operação funciona hoje e constrói o sistema em torno dela — módulo por módulo, na ordem que faz sentido pra você.',
+        list: ['Levantamento do seu processo atual', 'Sistema construído sob medida, não adaptado', 'Você escolhe quais módulos entram'],
+      },
+      automacao: {
+        img: 'images/services/automacao-ia.png',
+        title: 'Automação com IA',
+        desc: 'Tarefas repetitivas — responder dúvida comum, organizar dado, qualificar lead — passam a rodar sozinhas. A IA resolve o simples e te chama só quando a decisão realmente precisa de você.',
+        list: ['Resposta automática qualificada', 'Organização de dados sem esforço manual', 'IA treinada com o contexto do seu negócio'],
+        demo: 'demos/whatsapp-bot.html',
+      },
+      whatsapp: {
+        img: 'images/services/bot-whatsapp.png',
+        title: 'Atendimento via WhatsApp',
+        desc: 'Bot que atende no seu tom de voz, tira dúvida, agenda horário e qualifica quem tem potencial de virar cliente — 24 horas por dia, inclusive de madrugada e fim de semana.',
+        list: ['Atendimento 24 horas por dia', 'Agendamento direto na conversa', 'Qualificação automática de lead'],
+        demo: 'demos/whatsapp-bot.html',
+      },
+      crm: {
+        img: 'images/services/crm-funil.png',
+        title: 'CRM e funil de vendas',
+        desc: 'Cada conversa vira um card organizado por etapa — novo lead, em negociação, fechado. Histórico completo, follow-up automático, e nada mais se perde entre o WhatsApp e a planilha.',
+        list: ['Funil de vendas visual por etapa', 'Histórico completo de cada cliente', 'Follow-up automático de quem não respondeu'],
+        demo: 'demos/crm.html',
+      },
+      dashboard: {
+        img: 'images/services/relatorio-mensal.png',
+        title: 'Dashboard administrativo',
+        desc: 'Atendimento, vendas, conversão — tudo num painel só, atualizado em tempo real. Você abre e sabe exatamente o que está funcionando, sem esperar ninguém montar relatório.',
+        list: ['Métricas em tempo real', 'Painel único, sem planilha manual', 'Acesso de qualquer lugar, a qualquer hora'],
+        demo: 'demos/dashboard.html',
+      },
+      agenda: {
+        img: 'images/services/agenda-inteligente.png',
+        title: 'Agenda inteligente',
+        desc: 'O cliente marca direto pelo WhatsApp, recebe lembrete automático antes do horário e confirma sem ninguém precisar trocar mensagem manualmente. Menos falta, menos remarcação de última hora.',
+        list: ['Marcação automática pelo WhatsApp', 'Lembrete antes do horário', 'Confirmação sem esforço manual'],
+        demo: 'demos/agenda.html',
+      },
+      sites: {
+        img: 'images/services/site-completo.png',
+        title: 'Sites e plataformas',
+        desc: 'Seu ponto de contato digital 24h — carrega rápido, funciona perfeito no celular, e leva o visitante direto pro WhatsApp. Alguns exemplos de sites que já entregamos:',
+        list: ['Mobile first, com SEO local', 'Botão de WhatsApp integrado', 'Deploy automático, no ar em dias'],
+        demo: 'demos/cardapio.html',
+        gallery: [
+          { src: 'images/portfolio/mockup-barbearia.png', label: 'Barbearia' },
+          { src: 'images/portfolio/mockup-restaurante.png', label: 'Restaurante' },
+          { src: 'images/portfolio/mockup-clinica.png', label: 'Clínica / Estética' },
+          { src: 'images/portfolio/mockup-academia.png', label: 'Academia' },
+        ],
+      },
+      integracoes: {
+        img: 'images/services/integracoes.png',
+        title: 'Integrações',
+        desc: 'Planilha, CRM, agenda, financeiro — suas ferramentas passam a conversar entre si automaticamente. Sem copiar e colar dado de um sistema pro outro, sem retrabalho.',
+        list: ['Conecta com as ferramentas que você já usa', 'Zero dado duplicado entre sistemas', 'Sem retrabalho manual'],
+      },
+      financeiro: {
+        img: 'images/services/financeiro.png',
+        title: 'Financeiro',
+        desc: 'Cobrança automática por Pix ou boleto, lembrete pra quem está perto de atrasar, e visão clara de quem pagou e quem está devendo — sem precisar cobrar ninguém na mão.',
+        list: ['Cobrança automática (Pix/boleto)', 'Alerta de inadimplência', 'Visão consolidada do caixa'],
+        demo: 'demos/financeiro.html',
+      },
+      clientes: {
+        img: 'images/services/clientes.png',
+        title: 'Gestão de clientes',
+        desc: 'Cada cliente com uma ficha só: histórico de compra, preferências, contato, última interação. Sua equipe encontra tudo em segundos, sem perguntar de novo o que o cliente já disse.',
+        list: ['Ficha completa por cliente', 'Histórico de interações', 'Busca rápida por qualquer dado'],
+        demo: 'demos/clientes.html',
+      },
+      catalogo: {
+        img: 'images/services/catalogo.png',
+        title: 'Catálogo e vitrine',
+        desc: 'Seus produtos ou serviços organizados numa vitrine digital simples, integrada ao WhatsApp — o cliente navega, escolhe e o pedido já chega pronto pra você.',
+        list: ['Vitrine integrada ao WhatsApp', 'Atualização de preço e estoque em tempo real', 'Pedido chega organizado, sem confusão'],
+        demo: 'demos/catalogo.html',
+      },
+      suporte: {
+        img: 'images/services/suporte.png',
+        title: 'Central de suporte',
+        desc: 'Cada chamado organizado por prioridade e status, com histórico completo — nada se perde entre um atendimento e outro, mesmo com mais de uma pessoa respondendo.',
+        list: ['Chamados organizados por prioridade', 'Histórico completo por chamado', 'Nada se perde entre atendentes'],
+        demo: 'demos/suporte.html',
+      },
+      estoque: {
+        img: 'images/services/estoque.png',
+        title: 'Controle de estoque',
+        desc: 'Cada produto com sua quantidade sempre atualizada. Quando algo chega perto de acabar, você é avisado antes de faltar de verdade — não depois.',
+        list: ['Alerta automático de reposição', 'Entrada e saída em um clique', 'Visão de todo o estoque em tempo real'],
+        demo: 'demos/estoque.html',
+      },
+      funilagenda: {
+        img: 'images/services/funil-agenda.png',
+        title: 'Funil + Agenda integrados',
+        desc: 'Não são dois sistemas separados que você precisa ficar alternando. Quando um lead avança no funil, o agendamento já é oferecido ali mesmo — a automação real que conecta seus módulos.',
+        list: ['Agendamento oferecido automaticamente por etapa do funil', 'Sem trocar de tela ou sistema', 'Confirmação direto pro WhatsApp'],
+        demo: 'demos/funil-agenda.html',
+      },
+    }
+
+    function openGallery(slug) {
+      const data = SERVICE_DATA[slug]
+      if (!data) return
+      document.getElementById('galleryImg').src = data.img
+      document.getElementById('galleryTitle').textContent = data.title
+      document.getElementById('galleryDesc').textContent = data.desc
+      const demoLink = document.getElementById('galleryDemoLink')
+      if (data.demo) {
+        demoLink.style.display = 'inline-flex'
+        demoLink.setAttribute('href', data.demo)
+      } else {
+        demoLink.style.display = 'none'
+        demoLink.removeAttribute('href')
+      }
+      document.getElementById('galleryList').innerHTML = data.list.map(item => `<li>${item}</li>`).join('')
+      const examplesEl = document.getElementById('galleryExamples')
+      if (data.gallery && data.gallery.length) {
+        examplesEl.style.display = 'grid'
+        examplesEl.innerHTML = '<div class="gallery-examples-label">Exemplos ilustrativos</div>' +
+          data.gallery.map(g => `<img src="${g.src}" alt="${g.label}" onerror="this.style.display='none'">`).join('')
+      } else {
+        examplesEl.style.display = 'none'
+        examplesEl.innerHTML = ''
+      }
+      document.getElementById('galleryOverlay').classList.add('open')
+      document.body.style.overflow = 'hidden'
+    }
+
+    function closeGallery() {
+      document.getElementById('galleryOverlay').classList.remove('open')
+      document.body.style.overflow = ''
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeGallery()
+    })
+
+    // Marca com "Demo ao vivo" os cards que têm demonstração interativa real
+    document.querySelectorAll('.sol-card').forEach(card => {
+      const m = (card.getAttribute('onclick') || '').match(/openGallery\('([^']+)'\)/)
+      const slug = m && m[1]
+      const data = slug && SERVICE_DATA[slug]
+      if (data && data.demo) {
+        const mock = card.querySelector('.mini-mock')
+        if (mock) mock.insertAdjacentHTML('afterbegin', '<div class="demo-live-badge"><span class="live-dot"></span>Demo ao vivo</div>')
+      }
+    })
+
+    // WhatsApp links
+    document.querySelectorAll('.wa-link').forEach(el => {
+      const msg = encodeURIComponent(el.dataset.msg || 'Olá! Vi o site e gostaria de solicitar um orçamento para desenvolver um sistema personalizado.')
+      el.setAttribute('href', `https://wa.me/${WA_NUMBER}?text=${msg}`)
+      el.setAttribute('target', '_blank')
+      el.setAttribute('rel', 'noopener')
+    })
+
+    // Nav scroll state
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40)
+    }, { passive: true })
+
+    // Scroll reveal
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view')
+          revealObserver.unobserve(entry.target)
+        }
+      })
+    }, { threshold: .12, rootMargin: '0px 0px -40px 0px' })
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el))
+
+    // 3D tilt on hover
+    function initTilt(selector, strength) {
+      if (!isDesktop || reduceMotion) return
+      document.querySelectorAll(selector).forEach(el => {
+        el.addEventListener('mousemove', e => {
+          const r = el.getBoundingClientRect()
+          const x = (e.clientX - r.left) / r.width - .5
+          const y = (e.clientY - r.top) / r.height - .5
+          el.style.transform = `perspective(800px) rotateY(${x * strength}deg) rotateX(${-y * strength}deg) translateY(-12px) scale(1.03)`
+          el.style.setProperty('--mx', (x + .5) * 100 + '%')
+          el.style.setProperty('--my', (y + .5) * 100 + '%')
+        })
+        el.addEventListener('mouseleave', () => {
+          el.style.transform = 'perspective(800px) rotateY(0) rotateX(0) translateY(0) scale(1)'
+        })
+      })
+    }
+    initTilt('.sol-card', 26)
+    initTilt('.plan-card', 18)
+
+    // Magnetic buttons
+    if (isDesktop && !reduceMotion) {
+      document.querySelectorAll('.magnetic').forEach(el => {
+        el.addEventListener('mousemove', e => {
+          const r = el.getBoundingClientRect()
+          const x = e.clientX - (r.left + r.width / 2)
+          const y = e.clientY - (r.top + r.height / 2)
+          el.style.transform = `translate(${x * .35}px, ${y * .35}px)`
+        })
+        el.addEventListener('mouseleave', () => { el.style.transform = 'translate(0,0)' })
+      })
+    }
+
+    // Hero 3D parallax stage
+    const heroStage = document.getElementById('heroStage')
+    if (heroStage && isDesktop && !reduceMotion) {
+      const layers = heroStage.querySelectorAll('[data-depth]')
+      heroStage.addEventListener('mousemove', e => {
+        const r = heroStage.getBoundingClientRect()
+        const nx = (e.clientX - r.left) / r.width - .5
+        const ny = (e.clientY - r.top) / r.height - .5
+        layers.forEach(el => {
+          const depth = parseFloat(el.dataset.depth)
+          const tx = nx * 46 * depth
+          const ty = ny * 36 * depth
+          const rot = nx * 8 * depth
+          el.style.transform = `translate3d(${tx}px, ${ty}px, 0) rotate(${rot * .4}deg)`
+        })
+      })
+      heroStage.addEventListener('mouseleave', () => {
+        layers.forEach(el => { el.style.transform = 'translate3d(0,0,0)' })
+      })
+    }
+
+    // GSAP scroll-driven scenes
+    if (window.gsap && window.ScrollTrigger && !reduceMotion) {
+      gsap.registerPlugin(ScrollTrigger)
+
+      // Steps connector line fill + active step
+      gsap.to('#stepsLine', {
+        width: '100%',
+        ease: 'none',
+        scrollTrigger: { trigger: '.steps-wrap', start: 'top 70%', end: 'bottom 60%', scrub: .5 }
+      })
+      document.querySelectorAll('.step-card').forEach((el, i) => {
+        ScrollTrigger.create({
+          trigger: el, start: 'top 65%', end: 'bottom 65%',
+          onEnter: () => el.classList.add('active'),
+          onLeaveBack: () => el.classList.remove('active'),
+        })
+      })
+
+      ScrollTrigger.matchMedia({
+        '(min-width: 980px)': function () {
+          // Hero depth-based scroll parallax — layers move at different speeds as the hero scrolls away
+          const heroScroll = { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: .4 }
+          gsap.to('.stage-agenda-main', { yPercent: -8, ease: 'none', scrollTrigger: heroScroll })
+          gsap.to('.stage-money', { yPercent: -16, ease: 'none', scrollTrigger: heroScroll })
+          gsap.to('.stage-client', { yPercent: -20, ease: 'none', scrollTrigger: heroScroll })
+          gsap.to('.hero-inner > div:first-child', { yPercent: -10, opacity: .3, ease: 'none', scrollTrigger: heroScroll })
+
+          // Exploded-view system demo — always composed, even at rest; scroll pushes it further apart
+          gsap.set('#expMain', { scale: .88, rotateY: 8, rotateX: 5, opacity: 1, xPercent: -50, yPercent: -50 })
+          gsap.set('#expCrm', { x: -80, y: -55, opacity: .92, scale: .58, xPercent: -50, yPercent: -50 })
+          gsap.set('#expAgenda', { x: 85, y: -65, opacity: .92, scale: .58, xPercent: -50, yPercent: -50 })
+          gsap.set('#expRelatorios', { x: -75, y: 60, opacity: .92, scale: .58, xPercent: -50, yPercent: -50 })
+          gsap.set('#expChat', { x: 80, y: 60, opacity: .92, scale: .58, xPercent: -50, yPercent: -50 })
+          gsap.set('#expAutomacao', { x: 0, y: 95, opacity: .92, scale: .58, xPercent: -50, yPercent: -50 })
+
+          const demoTl = gsap.timeline({
+            scrollTrigger: { trigger: '#demonstracao', start: 'top top', end: '+=1800', scrub: .6, pin: '#demoPin' }
+          })
+          demoTl.to('#expMain', { scale: 1, rotateY: 0, rotateX: 0, duration: .3 })
+            .to('#expCrm', { x: -320, y: -120, opacity: 1, scale: 1, duration: .3 }, .08)
+            .to('#expAgenda', { x: 320, y: -140, opacity: 1, scale: 1, duration: .3 }, .14)
+            .to('#expRelatorios', { x: -310, y: 140, opacity: 1, scale: 1, duration: .3 }, .2)
+            .to('#expChat', { x: 320, y: 130, opacity: 1, scale: 1, duration: .3 }, .26)
+            .to('#expAutomacao', { x: 0, y: 215, opacity: 1, scale: 1, duration: .3 }, .32)
+            .to('#expMain', { scale: .94, duration: .3 }, .5)
+
+          // Module constellation assembly — chips fly in AND draw a connecting line to the core
+          const stage = document.getElementById('customStage')
+          const linesSvg = document.getElementById('customLines')
+          const chips = gsap.utils.toArray('.module-chip')
+          const radius = 220
+          const stageW = stage.getBoundingClientRect().width
+          const stageH = stage.getBoundingClientRect().height
+          const cx = stageW / 2
+          const cy = stageH / 2
+          const positions = chips.map((_, i) => {
+            const angle = (i / chips.length) * Math.PI * 2 - Math.PI / 2
+            return { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius }
+          })
+          const lineEls = positions.map((pos, i) => {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+            line.setAttribute('x1', cx); line.setAttribute('y1', cy)
+            line.setAttribute('x2', cx + pos.x); line.setAttribute('y2', cy + pos.y)
+            const len = Math.hypot(pos.x, pos.y)
+            line.setAttribute('stroke-dasharray', len)
+            line.setAttribute('stroke-dashoffset', len)
+            linesSvg.appendChild(line)
+            return { el: line, len }
+          })
+          chips.forEach((chip, i) => {
+            const scatterX = (Math.random() - .5) * 900
+            const scatterY = (Math.random() - .5) * 500
+            gsap.set(chip, { x: scatterX, y: scatterY, opacity: 0, rotate: (Math.random() - .5) * 40, xPercent: -50, yPercent: -50 })
+          })
+          const constellationTl = gsap.timeline({
+            scrollTrigger: { trigger: '#customStage', start: 'top 75%', end: 'top 10%', scrub: .6 }
+          })
+          chips.forEach((chip, i) => {
+            constellationTl.to(chip, { x: positions[i].x, y: positions[i].y, opacity: 1, rotate: 0, duration: 1 }, 0)
+            constellationTl.to(lineEls[i].el, { strokeDashoffset: 0, duration: 1 }, .15)
+          })
+        },
+        '(max-width: 979px)': function () {
+          gsap.set('#expMain', { opacity: 1, x: 0, y: -55, scale: .92, xPercent: -50, yPercent: -50 })
+          gsap.set('#expCrm', { opacity: 1, x: -95, y: 28, scale: .76, xPercent: -50, yPercent: -50 })
+          gsap.set('#expAgenda', { opacity: 1, x: 95, y: 18, scale: .76, xPercent: -50, yPercent: -50 })
+          gsap.set('#expRelatorios', { opacity: 1, x: -85, y: 112, scale: .76, xPercent: -50, yPercent: -50 })
+          gsap.set('#expChat', { opacity: 1, x: 88, y: 108, scale: .76, xPercent: -50, yPercent: -50 })
+          gsap.set('#expAutomacao', { opacity: 1, x: 0, y: 175, scale: .76, xPercent: -50, yPercent: -50 })
+          document.querySelectorAll('.module-chip').forEach((chip, i) => {
+            const cols = 5
+            gsap.set(chip, { x: (i % cols - 2) * 90, y: Math.floor(i / cols) * 60 - 30, opacity: 1, xPercent: -50, yPercent: -50 })
+          })
+        }
+      })
+    } else {
+      // reduced motion / no gsap fallback (also covers a blocked CDN) — static composed positions
+      const expPositions = {
+        expMain: [0, -55], expCrm: [-95, 28], expAgenda: [95, 18],
+        expRelatorios: [-85, 112], expChat: [88, 108], expAutomacao: [0, 175],
+      }
+      Object.keys(expPositions).forEach(id => {
+        const el = document.getElementById(id)
+        if (!el) return
+        const [x, y] = expPositions[id]
+        el.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`
+        el.style.opacity = '1'
+      })
+      const chips = document.querySelectorAll('.module-chip')
+      const radius = 220
+      const stage = document.getElementById('customStage')
+      const linesSvg = document.getElementById('customLines')
+      const cx = stage ? stage.getBoundingClientRect().width / 2 : 0
+      const cy = stage ? stage.getBoundingClientRect().height / 2 : 0
+      chips.forEach((chip, i) => {
+        const angle = (i / chips.length) * Math.PI * 2 - Math.PI / 2
+        const x = Math.cos(angle) * radius
+        const y = Math.sin(angle) * radius
+        chip.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`
+        chip.style.opacity = '1'
+        if (linesSvg) {
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+          line.setAttribute('x1', cx); line.setAttribute('y1', cy)
+          line.setAttribute('x2', cx + x); line.setAttribute('y2', cy + y)
+          linesSvg.appendChild(line)
+        }
+      })
+    }
+  </script>
+</body>
+</html>

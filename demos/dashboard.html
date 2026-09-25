@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard Administrativo — Demonstração | systemaIA</title>
+<meta name="description" content="Demonstração de dashboard administrativo com métricas, gráficos e atividade recente." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .filter-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+  .range-tabs{display:flex;gap:6px;background:var(--surface2);padding:4px;border-radius:50px;}
+  .range-tab{padding:7px 16px;border-radius:50px;font-size:.8rem;font-weight:600;color:var(--ink2);}
+  .range-tab.active{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm);}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+  .kpi-card{padding:22px;}
+  .kpi-label{font-size:.78rem;color:var(--ink3);font-weight:600;margin-bottom:10px;}
+  .kpi-value{font-size:1.7rem;font-weight:800;letter-spacing:-.02em;}
+  .kpi-delta{font-size:.78rem;font-weight:700;margin-top:6px;display:flex;align-items:center;gap:4px;}
+  .kpi-delta.up{color:var(--green);}
+  .kpi-delta.down{color:var(--red);}
+
+  .grid-2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:16px;}
+  .panel{padding:24px;}
+  .panel-title{font-size:.95rem;font-weight:700;margin-bottom:4px;}
+  .panel-sub{font-size:.78rem;color:var(--ink3);margin-bottom:20px;}
+
+  .bar-chart{display:flex;align-items:flex-end;gap:10px;height:180px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end;}
+  .bar{width:100%;background:linear-gradient(180deg,var(--ink) 0%,#3a3a40 100%);border-radius:6px 6px 2px 2px;position:relative;transition:opacity .2s;}
+  .bar:hover{opacity:.75;}
+  .bar-label{font-size:.7rem;color:var(--ink3);font-weight:600;}
+
+  .breakdown-row{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;margin-bottom:10px;}
+  .breakdown-track{height:8px;border-radius:6px;background:var(--surface2);overflow:hidden;margin-bottom:16px;}
+  .breakdown-fill{height:100%;background:var(--ink);border-radius:6px;}
+
+  table{width:100%;border-collapse:collapse;}
+  th{text-align:left;font-size:.72rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;padding:0 14px 12px;}
+  td{padding:14px;font-size:.85rem;border-top:1px solid var(--line);}
+  tr:hover td{background:var(--surface2);}
+
+  @media(max-width:900px){
+    .kpi-grid{grid-template-columns:1fr 1fr;}
+    .grid-2{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-topbar">
+  <div class="demo-topbar-inner">
+    <div class="demo-brand"><span class="logo">systema<span>IA</span></span><span class="sep">/</span><span class="label">Dashboard Administrativo</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="demo-tag">Demonstração</span>
+      <a href="../index.html" class="demo-back">← voltar ao site</a>
+      <a href="#" class="demo-cta wa-link" data-msg="Olá! Vi a demonstração de dashboard e quero entrar na lista de espera desse módulo.">Em desenvolvimento — entrar na lista →</a>
+    </div>
+  </div>
+</div>
+<div class="demo-banner">Isso é uma <strong>demonstração</strong> — os dados abaixo são de exemplo, pra mostrar como um dashboard real funcionaria.</div>
+
+<div class="demo-shell">
+  <div class="filter-row">
+    <div class="demo-page-head" style="margin-bottom:0;">
+      <h1>Visão geral</h1>
+      <p id="pageSub">Acompanhe seu negócio em tempo real</p>
+    </div>
+    <div class="range-tabs" id="rangeTabs"></div>
+  </div>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <div class="grid-2">
+    <div class="panel card">
+      <div class="panel-title">Faturamento por mês</div>
+      <div class="panel-sub">Últimos 6 meses</div>
+      <div class="bar-chart" id="barChart"></div>
+    </div>
+    <div class="panel card">
+      <div class="panel-title">Origem dos atendimentos</div>
+      <div class="panel-sub">Por canal, este mês</div>
+      <div id="breakdown"></div>
+    </div>
+  </div>
+
+  <div class="panel card">
+    <div class="panel-title">Atividade recente</div>
+    <div class="panel-sub">Últimos pedidos e atendimentos</div>
+    <div style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Cliente</th><th>Tipo</th><th>Valor</th><th>Status</th><th>Data</th></tr></thead>
+      <tbody id="activityBody"></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO DA DEMONSTRAÇÃO
+   Troque os valores abaixo pra personalizar essa demo pro cliente
+   ============================================================ */
+const CONFIG = {
+  negocio: 'Studio Bella Estética',
+  whatsapp: '5573988326856',   // WhatsApp da SUA equipe (usado só no botão "Quero o meu" do topo)
+}
+/* PRODUÇÃO — pra virar sistema real, trocar:
+   - os números fictícios abaixo por dados reais vindos do seu banco de dados,
+     Google Analytics e/ou Meta Ads API (faturamento, conversão, origem dos atendimentos)
+*/
+
+const WA_NUMBER = CONFIG.whatsapp
+document.querySelectorAll('.wa-link').forEach(el => {
+  const msg = encodeURIComponent(el.dataset.msg || 'Olá!')
+  el.setAttribute('href', `https://wa.me/${WA_NUMBER}?text=${msg}`)
+  el.setAttribute('target', '_blank')
+  el.setAttribute('rel', 'noopener')
+})
+document.getElementById('pageSub').textContent = `Acompanhe ${CONFIG.negocio} em tempo real`
+
+const RANGES = { '7d': 'Últimos 7 dias', '30d': 'Últimos 30 dias', '90d': 'Últimos 90 dias' }
+let activeRange = '30d'
+
+const DATA = {
+  '7d': {
+    kpis: [
+      { label:'Faturamento', value:'R$ 8.240', delta:'+6% vs. período anterior', up:true },
+      { label:'Novos clientes', value:'19', delta:'+3% vs. período anterior', up:true },
+      { label:'Taxa de conversão', value:'31%', delta:'-2% vs. período anterior', up:false },
+      { label:'Ticket médio', value:'R$ 217', delta:'+1% vs. período anterior', up:true },
+    ],
+    bars: [ ['S1',40], ['S2',62], ['S3',48], ['S4',70], ['S5',58], ['S6',85], ['S7',66] ],
+  },
+  '30d': {
+    kpis: [
+      { label:'Faturamento', value:'R$ 34.560', delta:'+18% vs. mês anterior', up:true },
+      { label:'Novos clientes', value:'86', delta:'+12% vs. mês anterior', up:true },
+      { label:'Taxa de conversão', value:'34%', delta:'+4% vs. mês anterior', up:true },
+      { label:'Ticket médio', value:'R$ 402', delta:'-3% vs. mês anterior', up:false },
+    ],
+    bars: [ ['Mar',22],['Abr',35],['Mai',28],['Jun',48],['Jul',62],['Ago',75] ],
+  },
+  '90d': {
+    kpis: [
+      { label:'Faturamento', value:'R$ 98.200', delta:'+24% vs. trimestre anterior', up:true },
+      { label:'Novos clientes', value:'241', delta:'+15% vs. trimestre anterior', up:true },
+      { label:'Taxa de conversão', value:'32%', delta:'+2% vs. trimestre anterior', up:true },
+      { label:'Ticket médio', value:'R$ 388', delta:'+5% vs. trimestre anterior', up:true },
+    ],
+    bars: [ ['Fev',30],['Mar',45],['Abr',38],['Mai',55],['Jun',68],['Jul',80] ],
+  }
+}
+
+const BREAKDOWN = [
+  { label:'WhatsApp', pct:52 },
+  { label:'Site', pct:28 },
+  { label:'Instagram', pct:14 },
+  { label:'Indicação', pct:6 },
+]
+
+const ACTIVITY = [
+  { name:'Marina Souza', type:'Pedido', value:'R$ 189,00', status:'Concluído', statusClass:'badge-green', date:'hoje, 14:32' },
+  { name:'Carlos Andrade', type:'Atendimento', value:'—', status:'Em andamento', statusClass:'badge-amber', date:'hoje, 13:58' },
+  { name:'Fernanda Lima', type:'Pedido', value:'R$ 452,00', status:'Concluído', statusClass:'badge-green', date:'hoje, 11:20' },
+  { name:'Roberto Dias', type:'Pedido', value:'R$ 76,00', status:'Cancelado', statusClass:'badge-red', date:'ontem, 19:41' },
+  { name:'Juliana Prado', type:'Atendimento', value:'—', status:'Concluído', statusClass:'badge-green', date:'ontem, 16:05' },
+]
+
+function renderRangeTabs(){
+  document.getElementById('rangeTabs').innerHTML = Object.entries(RANGES).map(([k,label]) =>
+    `<button class="range-tab ${k===activeRange?'active':''}" onclick="setRange('${k}')">${label.replace('Últimos ','')}</button>`
+  ).join('')
+}
+function setRange(r){ activeRange = r; renderAll() }
+
+function renderKpis(){
+  document.getElementById('kpiGrid').innerHTML = DATA[activeRange].kpis.map(k => `
+    <div class="kpi-card card">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-delta ${k.up?'up':'down'}">${k.up?'↑':'↓'} ${k.delta}</div>
+    </div>
+  `).join('')
+}
+
+function renderBars(){
+  const bars = DATA[activeRange].bars
+  const max = Math.max(...bars.map(b => b[1]))
+  document.getElementById('barChart').innerHTML = bars.map(([label, val]) => `
+    <div class="bar-col">
+      <div class="bar" style="height:${(val/max*100)}%" title="${label}: ${val}"></div>
+      <div class="bar-label">${label}</div>
+    </div>
+  `).join('')
+}
+
+function renderBreakdown(){
+  document.getElementById('breakdown').innerHTML = BREAKDOWN.map(b => `
+    <div class="breakdown-row"><span>${b.label}</span><strong>${b.pct}%</strong></div>
+    <div class="breakdown-track"><div class="breakdown-fill" style="width:${b.pct}%"></div></div>
+  `).join('')
+}
+
+function renderActivity(){
+  document.getElementById('activityBody').innerHTML = ACTIVITY.map(a => `
+    <tr>
+      <td>${a.name}</td>
+      <td>${a.type}</td>
+      <td>${a.value}</td>
+      <td><span class="badge ${a.statusClass}">${a.status}</span></td>
+      <td style="color:var(--ink3)">${a.date}</td>
+    </tr>
+  `).join('')
+}
+
+function renderAll(){
+  renderRangeTabs(); renderKpis(); renderBars(); renderBreakdown(); renderActivity()
+}
+renderAll()
+</script>
+</body>
+</html>
