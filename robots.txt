@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://systemaia.com.br/sitemap.xml

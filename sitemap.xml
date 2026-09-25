@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Só páginas de produto disponível. Demos de módulos em desenvolvimento
+     ficam fora de propósito: não devem ranquear como recurso pronto. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://systemaia.com.br/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://systemaia.com.br/sob-medida</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://systemaia.com.br/demos/agenda</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://systemaia.com.br/demos/clientes</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://systemaia.com.br/demos/financeiro</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+</urlset>
