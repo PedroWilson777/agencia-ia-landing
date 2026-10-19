@@ -1,1 +1,69 @@
-{ "cleanUrls": true }
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/agenda-static/:path*",
+      "destination": "https://saas-flow-eight.vercel.app/agenda-static/:path*"
+    },
+    {
+      "source": "/login",
+      "destination": "https://saas-flow-eight.vercel.app/login"
+    },
+    {
+      "source": "/signup",
+      "destination": "https://saas-flow-eight.vercel.app/signup"
+    },
+    {
+      "source": "/forgot-password",
+      "destination": "https://saas-flow-eight.vercel.app/forgot-password"
+    },
+    {
+      "source": "/reset-password",
+      "destination": "https://saas-flow-eight.vercel.app/reset-password"
+    },
+    {
+      "source": "/auth/:path*",
+      "destination": "https://saas-flow-eight.vercel.app/auth/:path*"
+    },
+    {
+      "source": "/agendar/:path*",
+      "destination": "https://saas-flow-eight.vercel.app/agendar/:path*"
+    },
+    {
+      "source": "/app",
+      "destination": "https://saas-flow-eight.vercel.app/app"
+    },
+    {
+      "source": "/app/:path*",
+      "destination": "https://saas-flow-eight.vercel.app/app/:path*"
+    },
+    {
+      "source": "/assinar",
+      "destination": "https://saas-flow-eight.vercel.app/assinar"
+    },
+    {
+      "source": "/cadastro",
+      "destination": "https://saas-flow-eight.vercel.app/cadastro"
+    },
+    {
+      "source": "/onboarding",
+      "destination": "https://saas-flow-eight.vercel.app/onboarding"
+    },
+    {
+      "source": "/admin",
+      "destination": "https://saas-flow-eight.vercel.app/admin"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "https://saas-flow-eight.vercel.app/admin/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://saas-flow-eight.vercel.app/api/:path*"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "https://saas-flow-eight.vercel.app/favicon.ico"
+    }
+  ]
+}
